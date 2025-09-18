@@ -5,7 +5,7 @@ Además, se genera un archivo .json en el sistema local para validación y respa
 
 El flujo está diseñado como pipeline ETL ligero (Extract, Transform, Load).</description>
     <groupId>4d617770-0199-1000-8129-a1cab7c4e5a1</groupId>
-    <name>NiFi_Weather_Data_Flow</name>
+    <name>NiFi_Weather_Flow</name>
     <snippet>
         <controllerServices>
             <id>5853a6c5-6fa0-3559-0000-000000000000</id>
@@ -173,6 +173,7 @@ El flujo está diseñado como pipeline ETL ligero (Extract, Transform, Load).</d
                 </entry>
                 <entry>
                     <key>Validation-query</key>
+                    <value>SELECT 1</value>
                 </entry>
                 <entry>
                     <key>dbcp-min-idle-conns</key>
@@ -2033,5 +2034,5 @@ El flujo está diseñado como pipeline ETL ligero (Extract, Transform, Load).</d
             <type>org.apache.nifi.processors.attributes.UpdateAttribute</type>
         </processors>
     </snippet>
-    <timestamp>09/17/2025 19:55:48 CEST</timestamp>
+    <timestamp>09/18/2025 08:56:59 CEST</timestamp>
 </template>

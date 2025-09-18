@@ -1,4 +1,18 @@
+# Dependencias principales
+
+crewai
+ollama
+streamlit
 fastapi
+python-multipart
+xml.etree
+pandas
+huggingface-hub
 uvicorn
 python-dotenv
-python-multipart
+
+# Para desarrollo
+
+pytest
+black
+flake8

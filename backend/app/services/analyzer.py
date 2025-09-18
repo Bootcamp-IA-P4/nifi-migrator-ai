@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from app.models.report import Report
 from app.agents.migration_crew import MigrationCrew 
 
@@ -22,7 +21,7 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
         return Report(
             total_processors=-1, 
             processors=["Análisis realizado por IA"], 
-            incompatibilities=[ai_generated_report] 
+            incompatibilities=[str(ai_generated_report)] 
         )
 
     except Exception as e:

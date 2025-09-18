@@ -30,7 +30,7 @@ class MigrationCrew:
             agents=[analyzer_agent, mapper_agent, reporter_agent],
             tasks=[analysis, mapping, reporting],
             process=Process.sequential,
-            verbose=2,
+            verbose=True,
         )
 
         # Ejecutamos el Crew, es decir, arrancamos el proceso

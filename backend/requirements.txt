@@ -10,6 +10,8 @@ pandas
 huggingface-hub
 uvicorn
 python-dotenv
+langchain
+langchain-groq
 
 # Para desarrollo
 

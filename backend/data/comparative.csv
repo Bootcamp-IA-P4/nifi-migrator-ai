@@ -1,0 +1,3 @@
+{"nifi1_xml": "<flow><processor>InvokeHTTP</processor></flow>", "nifi2_json": "{ \"processors\": [ { \"type\": \"InvokeHttp\" } ] }"}
+{"nifi1_xml": "<flow><processor>PutFile</processor></flow>", "nifi2_json": "{ \"processors\": [ { \"type\": \"PutFile\" } ] }"}
+{"nifi1_xml": "<flow><processor>PutDatabaseRecord</processor></flow>", "nifi2_json": "{ \"processors\": [ { \"type\": \"PutDatabaseRecord\" } ] }"}

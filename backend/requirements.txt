@@ -12,6 +12,7 @@ uvicorn
 python-dotenv
 langchain
 langchain-groq
+
 # Para desarrollo
 
 pytest

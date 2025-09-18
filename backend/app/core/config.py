@@ -8,6 +8,6 @@ class Settings:
     PROJECT_NAME: str = "NiFi Migrator AI"
     VERSION: str = "0.1.0"
     DEBUG: bool = True
-    OPENAI_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 
 settings = Settings()

@@ -1,8 +1,18 @@
-# Pydantic models (entrada/salida)
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+
+class ComponentReport(BaseModel):
+    componente_nifi_1: str
+    equivalente_nifi_2: str
+    notas: str
+
+class StructuredReport(BaseModel):
+    resumen_ejecutivo: str
+    analisis_componentes: List[ComponentReport]
+    puntos_criticos: List[str]
+    recomendaciones: List[str]
 
 class Report(BaseModel):
-    total_processors: int
-    processors: List[str]
-    incompatibilities: List[str]
+    report: Optional[StructuredReport] = None
+    error: Optional[str] = None
+

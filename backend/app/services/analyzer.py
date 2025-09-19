@@ -1,5 +1,6 @@
 from app.models.report import Report
 from app.agents.migration_crew import MigrationCrew 
+from . import report_parser
 
 # Este es el servicio principal que maneja la lógica de análisis y migración de NiFi.
 # recibe una petición web, la traduce para el sistema de IA, le delega todo el trabajo pesado, y luego empaqueta la respuesta de la IA para devolverla al usuario.
@@ -17,12 +18,12 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
         
         print("✅ Crew finalizado. Generando respuesta de la API...")
 
-        # Aquí lo que hacemos es devolver un bloque de texto que es el informe generado por la IA.
-        return Report(
-            total_processors=-1, 
-            processors=["Análisis realizado por IA"], 
-            incompatibilities=[str(ai_generated_report)] 
-        )
+        structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
+        
+        print("✅ Parsing completado. Generando respuesta de la API...")
+        
+        return Report(report=structured_report_dict)
 
     except Exception as e:
-        return Report(total_processors=0, processors=[], incompatibilities=[f"Error fatal en el servicio: {str(e)}"])
+        print(f"Error durante la ejecución: {e}")
+        return Report(error=f"Error fatal en el servicio: {str(e)}")

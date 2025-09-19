@@ -7,7 +7,7 @@ from app.agents.migration_crew import MigrationCrew
 def analyze_nifi_xml(xml_content: bytes) -> Report:
     try:
         # Como los agentes trabajan con strings, primero convertimos el XML de bytes a string.
-        xml_string = xml_content.decode('utf-8')
+        xml_string = xml_content.decode('utf-8', errors="ignore")
 
         # creamos una instancia del Crew de migración y le pasamos el XML que acabamos de preparar, es decir le pasamos los datos y le decimos que haga su trabajo.
         

@@ -26,3 +26,4 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
 
     except Exception as e:
         return Report(total_processors=0, processors=[], incompatibilities=[f"Error fatal en el servicio: {str(e)}"])
+

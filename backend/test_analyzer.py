@@ -35,11 +35,13 @@ def main():
         report = analyze_nifi_xml(xml_content_bytes)
 
         print("\n--- Analysis Complete. Final Report: ---")
-        if report.incompatibilities:
-            final_report_md = report.incompatibilities[0]
-            print(final_report_md)
+        if report.report and report.report.resumen_ejecutivo:
+            # Print the whole structured report for verification
+            print(report.report.model_dump_json(indent=2))
+        elif report.error:
+            print(f"An error occurred during analysis: {report.error}")
         else:
-            print("No incompatibilities reported or an error occurred.")
+            print("Analysis finished, but no report or error was generated.")
 
     except FileNotFoundError:
         print(f"Error: XML file not found at {xml_file_path}. Make sure you are running this script from the 'backend' directory.")

@@ -6,14 +6,14 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
     try:
         # Extraer cada sección usando expresiones regulares
         resumen = re.search(r"## Resumen Ejecutivo\s*\n(.*?)\n##", markdown_text, re.DOTALL)
-        componentes_md = re.search(r"## Análisis de Componentes\s*\n(.*?)\n##", markdown_text, re.DOTALL)
+        componentes_md = re.search(r"## (?:Análisis|Inventario) de Componentes\s*\n(.*?)\n##", markdown_text, re.DOTALL)
         puntos_criticos_md = re.search(r"## Puntos Críticos y Advertencias\s*\n(.*?)\n##", markdown_text, re.DOTALL)
-        recomendaciones_md = re.search(r"## Recomendaciones\s*\n(.*?)(?:\n##|$)", markdown_text, re.DOTALL)
+        recomendaciones_md = re.search(r"## Recomendaciones.*\s*\n(.*?)(?:\n##|$)", markdown_text, re.DOTALL)
 
         analisis_componentes = []
         if componentes_md:
             rows = re.findall(r"\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|", componentes_md.group(1))
-            for row in rows[1:]: 
+            for row in rows[1:]:
                 analisis_componentes.append(
                     ComponentReport(
                         componente_nifi_1=row[0].strip(),

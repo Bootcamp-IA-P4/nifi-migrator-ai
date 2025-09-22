@@ -30,3 +30,4 @@ app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
 @app.get("/")
 def read_root():
     return {"message": "Bienvenido a NiFi Migrator AI"}
+

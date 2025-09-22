@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 class ComponentReport(BaseModel):
     componente_nifi_1: str
@@ -13,6 +13,7 @@ class StructuredReport(BaseModel):
     recomendaciones: List[str]
 
 class Report(BaseModel):
-    report: Optional[StructuredReport] = None
+    structured: Optional[Dict[str, Any]] = None
+    raw_markdown: Optional[str] = None # chicos añado este para que reciba el informe completo
     error: Optional[str] = None
 

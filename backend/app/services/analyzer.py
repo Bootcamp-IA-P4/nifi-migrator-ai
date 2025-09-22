@@ -16,13 +16,18 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
         crew = MigrationCrew(xml_data=xml_string)
         ai_generated_report = crew.run()
         
+        
         print("✅ Crew finalizado. Generando respuesta de la API...")
 
-        structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
+        structured_report_dict = None
+        try:
+            structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
+        except Exception as parse_err:
+            print(f"No se pudo parsear el informe a JSON estructurado: {parse_err}")
         
         print("✅ Parsing completado. Generando respuesta de la API...")
         
-        return Report(report=structured_report_dict)
+        return Report(structured=structured_report_dict, raw_markdown=str(ai_generated_report))
 
     except Exception as e:
         print(f"Error durante la ejecución: {e}")

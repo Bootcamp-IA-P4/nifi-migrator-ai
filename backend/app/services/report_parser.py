@@ -36,18 +36,28 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
             data_rows = []
 
             header_map = {
+                "componente nifi1": "componente_nifi_1",
                 "componente nifi 1": "componente_nifi_1",
+                "componente nifi1.x": "componente_nifi_1",   # 👈 nueva
+                "equivalente nifi2": "equivalente_nifi_2",
                 "equivalente nifi 2": "equivalente_nifi_2",
+                "equivalente nifi2.x": "equivalente_nifi_2", # 👈 nueva
                 "notas": "notas",
             }
 
-            for row in rows[2:]:  # saltar cabecera y separadores
-                cols = [c.strip() for c in row.split("|") if c.strip()]
-                if not cols or all(c.startswith("-") for c in cols):
+            start_index = 1
+            if len(rows) > 1 and set(rows[1].replace("|", "").strip()) <= {"-", " "}:
+                start_index = 2
+
+            for row in rows[start_index:]:
+                cols = [c.strip() for c in row.split("|")]
+                if not any(cols):
                     continue
                 mapped = {}
                 for i, col in enumerate(cols):
-                    key = header_map.get(headers[i], headers[i])
+                    if not col:
+                        continue
+                    key = header_map.get(headers[i], headers[i]) if i < len(headers) else f"col_{i}"
                     mapped[key] = col
                 data_rows.append(mapped)
 

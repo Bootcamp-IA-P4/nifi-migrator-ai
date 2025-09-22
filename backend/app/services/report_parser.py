@@ -1,38 +1,99 @@
 import re
-from app.models.report import ComponentReport, StructuredReport
-from typing import Dict, Any
+from typing import Dict, Any, List
+
 
 def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
+    """
+    Convierte un informe en Markdown a JSON enriquecido
+    con soporte para títulos, tablas, listas y texto libre.
+    """
+
     try:
-        # Extraer cada sección usando expresiones regulares
-        resumen = re.search(r"## Resumen Ejecutivo\s*\n(.*?)\n##", markdown_text, re.DOTALL)
-        componentes_md = re.search(r"## Análisis de Componentes\s*\n(.*?)\n##", markdown_text, re.DOTALL)
-        puntos_criticos_md = re.search(r"## Puntos Críticos y Advertencias\s*\n(.*?)\n##", markdown_text, re.DOTALL)
-        recomendaciones_md = re.search(r"## Recomendaciones\s*\n(.*?)(?:\n##|$)", markdown_text, re.DOTALL)
+        # -------------------------
+        # Funciones auxiliares
+        # -------------------------
 
-        analisis_componentes = []
-        if componentes_md:
-            rows = re.findall(r"\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|", componentes_md.group(1))
-            for row in rows[1:]: 
-                analisis_componentes.append(
-                    ComponentReport(
-                        componente_nifi_1=row[0].strip(),
-                        equivalente_nifi_2=row[1].strip(),
-                        notas=row[2].strip()
-                    ).dict()
-                )
+        def extract_list(md_block: str) -> List[str]:
+            """Extraer listas con - o *"""
+            if not md_block:
+                return []
+            return [
+                item.strip("-* ").strip()
+                for item in md_block.splitlines()
+                if item.strip().startswith(("-", "*"))
+            ]
 
-        puntos_criticos = re.findall(r"^\*\s*(.*)", puntos_criticos_md.group(1), re.MULTILINE) if puntos_criticos_md else []
-        recomendaciones = re.findall(r"^\*\s*(.*)", recomendaciones_md.group(1), re.MULTILINE) if recomendaciones_md else []
+        def extract_table(md_block: str) -> List[Dict[str, str]]:
+            """Convierte tabla Markdown en lista de dicts"""
+            if not md_block:
+                return []
 
-        structured_data = StructuredReport(
-            resumen_ejecutivo=resumen.group(1).strip() if resumen else "",
-            analisis_componentes=analisis_componentes,
-            puntos_criticos=[pc.strip() for pc in puntos_criticos],
-            recomendaciones=[r.strip() for r in recomendaciones]
-        )
+            rows = [r.strip() for r in md_block.strip().split("\n") if r.strip()]
+            if len(rows) < 2:
+                return []
 
-        return structured_data.dict()
+            headers = [h.strip() for h in rows[0].split("|") if h.strip()]
+            data_rows = []
+
+            for row in rows[2:]:  # saltar cabecera y separadores
+                cols = [c.strip() for c in row.split("|") if c.strip()]
+                if not cols or all(c.startswith("-") for c in cols):
+                    continue
+                data_rows.append(dict(zip(headers, cols)))
+
+            return data_rows
+
+        # -------------------------
+        # Extraer secciones por títulos
+        # -------------------------
+
+        sections = {}
+        matches = re.finditer(r"^(##+)\s*(.*)$", markdown_text, re.MULTILINE)
+        positions = [(m.start(), m.group(1), m.group(2)) for m in matches]
+        positions.append((len(markdown_text), None, None))  # marcador final
+
+        for i in range(len(positions) - 1):
+            start, lvl, title = positions[i]
+            end, _, _ = positions[i + 1]
+            content = markdown_text[start:end].split("\n", 1)
+            if len(content) == 2:
+                body = content[1].strip()
+            else:
+                body = ""
+
+            sections[title] = body
+
+        # -------------------------
+        # Construir JSON estructurado
+        # -------------------------
+
+        structured_data = {
+            "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
+            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+            "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
+            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+        }
+
+        # También incluir TODAS las tablas detectadas
+        tablas_detectadas = {}
+        for title, content in sections.items():
+            if "|" in content and "---" in content:
+                tablas_detectadas[title] = extract_table(content)
+
+        # También incluir TODAS las listas detectadas
+        listas_detectadas = {}
+        for title, content in sections.items():
+            if any(line.strip().startswith(("-", "*")) for line in content.splitlines()):
+                listas_detectadas[title] = extract_list(content)
+
+        return {
+            "formato": "markdown",
+            "markdown_original": markdown_text,
+            "json_estructurado": structured_data,
+            "tablas": tablas_detectadas,
+            "listas": listas_detectadas,
+            "secciones": list(sections.keys()),
+        }
 
     except Exception as e:
         print(f"Error al parsear el Markdown: {e}")

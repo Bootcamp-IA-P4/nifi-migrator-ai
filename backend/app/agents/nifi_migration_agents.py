@@ -1,5 +1,5 @@
 from crewai import Agent
-from core.llms import llm
+from app.core.llms import llm
 
 # Esta es una estructura simple de agentes para la migración de NiFi, me imagino que lo iremos cambiando según vayamos probando
 

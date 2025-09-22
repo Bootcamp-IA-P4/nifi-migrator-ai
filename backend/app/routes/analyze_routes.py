@@ -1,7 +1,7 @@
 # Endpoints para análisis de XML
 from fastapi import APIRouter, UploadFile
-from services import analyzer
-from models.report import Report
+from app.services import analyzer
+from app.models.report import Report
 
 router = APIRouter()
 
@@ -12,7 +12,7 @@ async def analyze_xml(file: UploadFile):
     return result
 
 from fastapi import APIRouter
-from services.nifi_parser import parse_template, parse_directory, export_to_csv
+from app.services.nifi_parser import parse_template, parse_directory, export_to_csv
 import os
 
 router = APIRouter()
@@ -39,3 +39,15 @@ def analyze_all():
         "templates": [tpl["template"] for tpl in parsed],
         "csv": CSV_OUT,
     }
+
+from fastapi import APIRouter, Body
+from app.services.report_parser import parse_markdown_to_json
+
+router = APIRouter()
+
+@router.post("/parse_report")
+def parse_report(markdown_text: str = Body(..., embed=True)):
+    """
+    Recibe un informe en Markdown y devuelve JSON enriquecido.
+    """
+    return parse_markdown_to_json(markdown_text)

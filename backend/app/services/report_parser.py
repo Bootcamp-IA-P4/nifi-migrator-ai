@@ -32,14 +32,24 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
             if len(rows) < 2:
                 return []
 
-            headers = [h.strip() for h in rows[0].split("|") if h.strip()]
+            headers = [h.strip().lower() for h in rows[0].split("|") if h.strip()]
             data_rows = []
+
+            header_map = {
+                "componente nifi 1": "componente_nifi_1",
+                "equivalente nifi 2": "equivalente_nifi_2",
+                "notas": "notas",
+            }
 
             for row in rows[2:]:  # saltar cabecera y separadores
                 cols = [c.strip() for c in row.split("|") if c.strip()]
                 if not cols or all(c.startswith("-") for c in cols):
                     continue
-                data_rows.append(dict(zip(headers, cols)))
+                mapped = {}
+                for i, col in enumerate(cols):
+                    key = header_map.get(headers[i], headers[i])
+                    mapped[key] = col
+                data_rows.append(mapped)
 
             return data_rows
 
@@ -87,13 +97,11 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
                 listas_detectadas[title] = extract_list(content)
 
         return {
-    "report": {
-        "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
-        "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
-        "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
-        "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
-    }
-}
+            "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
+            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+            "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
+            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+        }
 
 
     except Exception as e:

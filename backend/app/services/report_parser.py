@@ -38,10 +38,10 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
             header_map = {
                 "componente nifi1": "componente_nifi_1",
                 "componente nifi 1": "componente_nifi_1",
-                "componente nifi1.x": "componente_nifi_1",   # 👈 nueva
+                "componente nifi1.x": "componente_nifi_1",  
                 "equivalente nifi2": "equivalente_nifi_2",
                 "equivalente nifi 2": "equivalente_nifi_2",
-                "equivalente nifi2.x": "equivalente_nifi_2", # 👈 nueva
+                "equivalente nifi2.x": "equivalente_nifi_2", 
                 "notas": "notas",
             }
 
@@ -70,7 +70,7 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
         sections = {}
         matches = re.finditer(r"^(##+)\s*(.*)$", markdown_text, re.MULTILINE)
         positions = [(m.start(), m.group(1), m.group(2)) for m in matches]
-        positions.append((len(markdown_text), None, None))  # marcador final
+        positions.append((len(markdown_text), None, None)) 
 
         for i in range(len(positions) - 1):
             start, lvl, title = positions[i]

@@ -1,4 +1,3 @@
-# Endpoints para análisis de XML
 from fastapi import APIRouter, UploadFile
 from app.services import analyzer
 from app.models.report import Report

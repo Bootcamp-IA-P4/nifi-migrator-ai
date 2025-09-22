@@ -87,13 +87,14 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
                 listas_detectadas[title] = extract_list(content)
 
         return {
-            "formato": "markdown",
-            "markdown_original": markdown_text,
-            "json_estructurado": structured_data,
-            "tablas": tablas_detectadas,
-            "listas": listas_detectadas,
-            "secciones": list(sections.keys()),
-        }
+    "report": {
+        "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
+        "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+        "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
+        "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+    }
+}
+
 
     except Exception as e:
         print(f"Error al parsear el Markdown: {e}")

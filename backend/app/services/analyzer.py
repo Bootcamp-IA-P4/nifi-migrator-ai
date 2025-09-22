@@ -1,5 +1,5 @@
-from app.models.report import Report
-from app.agents.migration_crew import MigrationCrew 
+from models.report import Report
+from agents.migration_crew import MigrationCrew 
 
 # Este es el servicio principal que maneja la lógica de análisis y migración de NiFi.
 # recibe una petición web, la traduce para el sistema de IA, le delega todo el trabajo pesado, y luego empaqueta la respuesta de la IA para devolverla al usuario.

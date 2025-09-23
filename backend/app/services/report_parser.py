@@ -25,27 +25,45 @@ def parse_markdown_to_json(markdown_text: str) -> StructuredReport:
         if len(rows) < 2:
             return []
 
-        headers = [h.strip() for h in rows[0].split("|") if h.strip()]
-        data_rows = []
+            headers = [h.strip().lower() for h in rows[0].split("|") if h.strip()]
+            data_rows = []
 
-        for row in rows[2:]:  # saltamos cabecera y separadores
-            cols = [c.strip() for c in row.split("|") if c.strip()]
-            if not cols or all(c.startswith("-") for c in cols):
-                continue
-            data_rows.append(
-                ComponentReport(
-                    componente_nifi_1=cols[0],
-                    equivalente_nifi_2=cols[1] if len(cols) > 1 else "",
-                    notas=cols[2] if len(cols) > 2 else "",
-                )
-            )
-        return data_rows
+            header_map = {
+                "componente nifi1": "componente_nifi_1",
+                "componente nifi 1": "componente_nifi_1",
+                "componente nifi1.x": "componente_nifi_1",  
+                "equivalente nifi2": "equivalente_nifi_2",
+                "equivalente nifi 2": "equivalente_nifi_2",
+                "equivalente nifi2.x": "equivalente_nifi_2", 
+                "notas": "notas",
+            }
 
-    # Extraer secciones
-    sections = {}
-    matches = re.finditer(r"^(##+)\s*(.*)$", markdown_text, re.MULTILINE)
-    positions = [(m.start(), m.group(2)) for m in matches]
-    positions.append((len(markdown_text), None))  # marcador final
+            start_index = 1
+            if len(rows) > 1 and set(rows[1].replace("|", "").strip()) <= {"-", " "}:
+                start_index = 2
+
+            for row in rows[start_index:]:
+                cols = [c.strip() for c in row.split("|")]
+                if not any(cols):
+                    continue
+                mapped = {}
+                for i, col in enumerate(cols):
+                    if not col:
+                        continue
+                    key = header_map.get(headers[i], headers[i]) if i < len(headers) else f"col_{i}"
+                    mapped[key] = col
+                data_rows.append(mapped)
+
+            return data_rows
+
+        # -------------------------
+        # Extraer secciones por títulos
+        # -------------------------
+
+        sections = {}
+        matches = re.finditer(r"^(##+)\s*(.*)$", markdown_text, re.MULTILINE)
+        positions = [(m.start(), m.group(1), m.group(2)) for m in matches]
+        positions.append((len(markdown_text), None, None)) 
 
     for i in range(len(positions) - 1):
         start, title = positions[i]
@@ -54,10 +72,37 @@ def parse_markdown_to_json(markdown_text: str) -> StructuredReport:
         body = content[1].strip() if len(content) > 1 else ""
         sections[title] = body
 
-    # 🚀 Devolvemos un StructuredReport, no un dict
-    return StructuredReport(
-        resumen_ejecutivo=sections.get("Resumen Ejecutivo", ""),
-        analisis_componentes=extract_table(sections.get("Análisis de Componentes", "")),
-        puntos_criticos=extract_list(sections.get("Puntos Críticos y Advertencias", "")),
-        recomendaciones=extract_list(sections.get("Recomendaciones", "")),
-    )
+        # -------------------------
+        # Construir JSON estructurado
+        # -------------------------
+
+        structured_data = {
+            "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
+            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+            "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
+            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+        }
+
+        # También incluir TODAS las tablas detectadas
+        tablas_detectadas = {}
+        for title, content in sections.items():
+            if "|" in content and "---" in content:
+                tablas_detectadas[title] = extract_table(content)
+
+        # También incluir TODAS las listas detectadas
+        listas_detectadas = {}
+        for title, content in sections.items():
+            if any(line.strip().startswith(("-", "*")) for line in content.splitlines()):
+                listas_detectadas[title] = extract_list(content)
+
+        return {
+            "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
+            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+            "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
+            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+        }
+
+
+    except Exception as e:
+        print(f"Error al parsear el Markdown: {e}")
+        raise ValueError("No se pudo parsear el informe Markdown a JSON.") from e

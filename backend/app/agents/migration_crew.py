@@ -29,9 +29,4 @@ class MigrationCrew:
         )
 
         result = crew.kickoff()
-
-        try:
-            structured = parse_markdown_to_structured(result)
-            return Report(report=structured)
-        except Exception as e:
-            return Report(error=f"Error al parsear reporte: {str(e)}")
+        return result

@@ -1,58 +1,43 @@
 from crewai import Task
-from textwrap import dedent
-
-# Este archivo es el lugar donde definimos tareas para nuestros agentes.
-# Cada tarea está metida aquí pero se pueden pasar a un archivo separado de prompst y llamarse desde aquí.
+from .prompts import (
+    ANALYSIS_TASK_DESCRIPTION,
+    ANALYSIS_TASK_EXPECTED_OUTPUT,
+    MAPPING_TASK_DESCRIPTION,
+    MAPPING_TASK_EXPECTED_OUTPUT,
+    REPORTING_TASK_DESCRIPTION,
+    REPORTING_TASK_EXPECTED_OUTPUT
+)
 
 class NifiMigrationTasks:
-    def analysis_task(self, agent, parsed_xml_data: str) -> Task:
-        #esta es la instrucción para el agente que analiza el xml.
+    """
+    This class defines the tasks for the NiFi migration crew.
+    It separates the task definitions from the prompt details, which are
+    imported from prompts.py for better maintainability.
+    """
+    def analysis_task(self, agent, nifi_template_content: str) -> Task:
+        """Task to analyze the NiFi 1.x XML template."""
         return Task(
-            description=dedent(f"""Analiza la siguiente estructura de flujo de NiFi 1.x, extraída de un template XML.
-                Tu misión es listar todos los componentes encontrados.
-
-                Datos del Flujo a Analizar:
-                ---
-                {parsed_xml_data}
-                ---
-
-                Identifica cada procesador y servicio controlador por su nombre y, más importante, por su tipo (type).
-                Proporciona un resumen claro y conciso de los componentes.
-            """),
-            expected_output="Una lista estructurada de procesadores y servicios controladores, detallando su nombre y tipo.",
+            description=ANALYSIS_TASK_DESCRIPTION.format(
+                nifi_template_content=nifi_template_content
+            ),
+            expected_output=ANALYSIS_TASK_EXPECTED_OUTPUT,
             agent=agent,
         )
 
     def mapping_task(self, agent, context_task: Task) -> Task:
-        # esta tarea es para el agente que mapea los componentes a nifi 2
+        """Task to map NiFi 1.x components to NiFi 2.x equivalents."""
         return Task(
-            description=dedent("""Basado en el análisis de componentes de NiFi 1.x, tu tarea es mapear cada uno a su equivalente en NiFi 2.x.
-                Debes explicar qué ha cambiado para cada componente.
-
-                Para cada componente, determina:
-                1. Si la migración es directa.
-                2. Si el componente ha sido reemplazado o renombrado.
-                3. Si es un componente obsoleto que requiere una estrategia completamente nueva.
-            """),
-            expected_output="Un informe técnico detallado que describa el plan de migración para cada componente.",
+            description=MAPPING_TASK_DESCRIPTION,
+            expected_output=MAPPING_TASK_EXPECTED_OUTPUT,
             agent=agent,
             context=[context_task],
         )
 
     def reporting_task(self, agent, context_task: Task) -> Task:
-        # esta tarea es para el agente redactor.
+        """Task to create a comprehensive migration report."""
         return Task(
-            description=dedent("""
-                Usando el análisis de mapeo técnico, genera un informe de migración completo en formato Markdown.
-                El informe debe ser profesional, claro y dirigido a un equipo de desarrolladores.
-
-                El informe DEBE incluir las siguientes secciones:
-                - **Resumen Ejecutivo**
-                - **Análisis de Componentes** (Tabla: Componente NiFi 1, Equivalente NiFi 2, Notas)
-                - **Puntos Críticos y Advertencias**
-                - **Recomendaciones**
-            """),
-            expected_output="Un informe final completo en formato Markdown, con todas las secciones requeridas.",
+            description=REPORTING_TASK_DESCRIPTION,
+            expected_output=REPORTING_TASK_EXPECTED_OUTPUT,
             agent=agent,
             context=[context_task],
         )

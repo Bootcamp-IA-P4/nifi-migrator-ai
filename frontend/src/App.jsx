@@ -9,7 +9,7 @@ function App() {
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>NiFi Migrator AI</h1>
       <UploadForm onReport={setReport} />
-      {report && <ReportView report={report} />}
+      <ReportView report={report} />
     </div>
   );
 }

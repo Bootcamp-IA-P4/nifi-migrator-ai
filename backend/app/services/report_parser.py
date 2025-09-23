@@ -14,13 +14,13 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
         # -------------------------
 
         def extract_list(md_block: str) -> List[str]:
-            """Extraer listas con - o *"""
+            """Extraer listas con -, * o numeradas (1., 2., etc.)"""
             if not md_block:
                 return []
             return [
-                item.strip("-* ").strip()
+                re.sub(r"^\d+\.\s*", "", item).strip("-* ").strip()
                 for item in md_block.splitlines()
-                if item.strip().startswith(("-", "*"))
+                if item.strip().startswith(("-", "*")) or re.match(r"^\d+\.\s", item.strip())
             ]
 
         def extract_table(md_block: str) -> List[Dict[str, str]]:
@@ -89,10 +89,18 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
 
         structured_data = {
             "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
-            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
+            "analisis_componentes": extract_table(
+                sections.get("Análisis de Componentes", "")
+                or sections.get("Inventario de Componentes", "")
+                or sections.get("Plan de Migración Detallado", "")
+            ),
             "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
-            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
+            "recomendaciones": extract_list(
+                sections.get("Recomendaciones", "")
+                or sections.get("Recomendaciones y Próximos Pasos", "")
+            ),
         }
+        
 
         # También incluir TODAS las tablas detectadas
         tablas_detectadas = {}
@@ -106,12 +114,7 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
             if any(line.strip().startswith(("-", "*")) for line in content.splitlines()):
                 listas_detectadas[title] = extract_list(content)
 
-        return {
-            "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
-            "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
-            "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
-            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
-        }
+        return structured_data
 
 
     except Exception as e:

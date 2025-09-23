@@ -1,6 +1,8 @@
-from fastapi import APIRouter, UploadFile
+# Endpoints para análisis de XML
+from fastapi import APIRouter, UploadFile, Response
 from app.services import analyzer
 from app.models.report import Report
+import json
 
 router = APIRouter()
 

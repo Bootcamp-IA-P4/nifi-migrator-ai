@@ -17,3 +17,4 @@ langchain-groq
 pytest
 black
 flake8
+requests

@@ -18,3 +18,9 @@ pytest
 black
 flake8
 requests
+supabase
+langchain-community
+faiss-cpu
+pypdf
+langchain-openai
+sentence-transformers

@@ -91,10 +91,7 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
             "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
             "analisis_componentes": extract_table(sections.get("Análisis de Componentes", "")),
             "puntos_criticos": extract_list(sections.get("Puntos Críticos y Advertencias", "")),
-            "recomendaciones": extract_list(
-                sections.get("Recomendaciones", "") 
-                or sections.get("Recomendaciones y Próximos Pasos", "")
-            ),
+            "recomendaciones": extract_list(sections.get("Recomendaciones", "")),
         }
 
         # También incluir TODAS las tablas detectadas

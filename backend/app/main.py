@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # ← Agregar esta importación
 from app.routes import analyze_routes as analyze
+from app.routes import help_routes as help
+
+
+
 
 app = FastAPI(
     title="NiFi Migrator AI",
@@ -26,7 +30,8 @@ app.add_middleware(
 )
 
 app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
-
+app.include_router(help.router, prefix="/api/v1", tags=["Help"])
+ 
 @app.get("/")
 def read_root():
     return {"message": "Bienvenido a NiFi Migrator AI"}

@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-frontend/node_modules
+node_modules
 dist
 dist-ssr
 *.local
@@ -22,9 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-<<<<<<< HEAD:frontend/.gitignore
-=======
-node_modules/
-
->>>>>>> c9204cf (Feature/Frontend):.gitignore

@@ -2,7 +2,7 @@ from crewai import Crew, Process
 from .nifi_migration_agents import NifiMigrationAgents
 from .nifi_migration_tasks import NifiMigrationTasks
 
-# Este archivo es el que orquesta todo el proceso de migración usando CrewAI, llama al archivo de agentes, asigna el trabajo con tasks
+# Este archivo es el que orquesta todo el proceso de migraciÃ³n usando CrewAI, llama al archivo de agentes, asigna el trabajo con tasks
 # Crea el Crew y le dice que el proceso es secuencial, es decir que un agente no puede empezar hasta que el anterior haya terminado, y 
 # finalmente arranca el proceso con kickoff()
 

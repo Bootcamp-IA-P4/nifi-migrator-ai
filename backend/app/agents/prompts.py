@@ -146,6 +146,8 @@ MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
 REPORTING_TASK_DESCRIPTION = dedent("""
     You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize the detailed component analysis and the property-level migration mapping into a single, comprehensive, and professional migration report.
     The report must be clear, well-structured, and provide actionable insights for a technical audience.
+
+    Additionally, you MUST generate a Mermaid diagram (using `graph TD` for a top-down flow) that visually represents the migration process. This diagram should illustrate the key steps and components involved in migrating the NiFi flow from 1.x to 2.x, based on the analysis and mapping provided. The Mermaid code should be included in a separate block at the end of the report, as specified in the expected output format.
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
@@ -158,4 +160,13 @@ REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
     3.  **Plan de Migración Detallado:** This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
     4.  **Puntos Críticos y Advertencias:** A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
     5.  **Recomendaciones y Próximos Pasos:** A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
+
+    6.  **Diagrama de Flujo (Mermaid):** Un bloque de código que contenga la definición del diagrama de flujo en formato Mermaid. Este bloque debe ser fácilmente parseable por el frontend.
+
+        ```mermaid
+        graph TD
+            A[NiFi 1.x Flow] --> B{Analyze}
+            B --> C{Map to 2.x}
+            C --> D[NiFi 2.x Flow]
+        ```
 """)

@@ -24,3 +24,15 @@ faiss-cpu
 pypdf
 langchain-openai
 sentence-transformers
+
+fastapi
+uvicorn[standard]
+crewai
+langchain
+langchain-groq
+openai
+tiktoken
+pydantic
+pydantic-settings
+httpx
+requests

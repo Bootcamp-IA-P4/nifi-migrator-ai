@@ -1,16 +1,25 @@
-import React, { useState } from "react";
-import UploadForm from "./components/UploadForm";
-import ReportView from "./components/ReportView";
+// src/App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Upload from "./pages/Upload";
+import About from "./pages/About";
+import Navbar from "./components/navbar";
+import Footer from "./components/Footer";
 
 function App() {
-  const [report, setReport] = useState(null);
-
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>NiFi Migrator AI</h1>
-      <UploadForm onReport={setReport} />
-      <ReportView report={report} />
-    </div>
+    <BrowserRouter>
+      <Navbar />
+
+      <main className="pt-20 min-h-screen flex flex-col">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/upload" element={<Upload />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </main>
+      <Footer />
+    </BrowserRouter>
   );
 }
 

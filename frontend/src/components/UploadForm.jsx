@@ -1,98 +1,120 @@
-import React, { useState } from "react";
+// src/components/UploadForm.jsx
+import React, { useState, useCallback } from "react";
 import axios from "axios";
+import { Upload } from "lucide-react";
 
 function UploadForm({ onReport }) {
   const [file, setFile] = useState(null);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setError("");
-  };
+  // Drag events
+  const handleDrag = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
-      setError("Please select a file first.");
+      setError("⚠️ Please select or drag a file before uploading.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setError(null);
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const res = await axios.post("http://127.0.0.1:8000/api/v1/analyze", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      onReport(res.data);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/analyze",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      onReport(response.data);
     } catch (err) {
-      setError("Error uploading file. Please try again.");
-      console.error(err);
+      setError("❌ Could not connect to backend.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto", fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ marginBottom: "1rem" }}>Upload Analysis File</h2>
-      <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit}
+      onDragEnter={handleDrag}
+      className="w-full max-w-xl mx-auto flex flex-col items-center gap-4"
+    >
+      {/* Drag & Drop area */}
+      <label
+        className={`w-full flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 
+          ${
+            dragActive
+              ? "border-blue-500 bg-blue-50/50"
+              : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/30"
+          }`}
+      >
+        <Upload className="w-10 h-10 text-blue-600 mb-3" />
+        <p className="text-gray-700 font-medium">
+          {file ? file.name : "Drag & Drop your XML file here"}
+        </p>
+        <p className="text-sm text-gray-500">or click to select a file</p>
+        <input
+          type="file"
+          accept=".xml"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="hidden"
+        />
+      </label>
+
+      {/* Submit button */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`px-6 py-3 rounded-xl font-semibold text-white shadow-md transition-all duration-300 
+          ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+      >
+        {loading ? "Uploading..." : "Upload"}
+      </button>
+
+      {/* Error message */}
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+
+      {/* Handle drop outside label */}
+      {dragActive && (
         <div
-          style={{
-            border: "2px dashed #ccc",
-            borderRadius: "8px",
-            padding: "2rem",
-            textAlign: "center",
-            backgroundColor: "#f9f9f9"
-          }}
-        >
-          <input
-            type="file"
-            accept=".xml,.csv,.txt"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-            id="fileInput"
-          />
-          <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
-            <p style={{ marginBottom: "1rem" }}>Drag and drop or select file</p>
-            <button
-              type="button"
-              onClick={() => document.getElementById("fileInput").click()}
-              style={{
-                padding: "0.5rem 1.5rem",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                backgroundColor: "#fff",
-                cursor: "pointer"
-              }}
-            >
-              Choose File
-            </button>
-          </label>
-          {file && <p style={{ marginTop: "1rem" }}>📂 {file.name}</p>}
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            marginTop: "1.5rem",
-            padding: "0.75rem 2rem",
-            border: "none",
-            borderRadius: "4px",
-            backgroundColor: "#000",
-            color: "#fff",
-            cursor: "pointer"
-          }}
-        >
-          {loading ? "Uploading..." : "Upload"}
-        </button>
-      </form>
-
-      {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
-    </div>
+          className="absolute inset-0 z-50"
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        ></div>
+      )}
+    </form>
   );
 }
 

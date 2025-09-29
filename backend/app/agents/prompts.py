@@ -151,22 +151,28 @@ REPORTING_TASK_DESCRIPTION = dedent("""
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
-    A final, polished migration report in Markdown, written in **Spanish**.
+    # Informe de Migración de NiFi 1.x a 2.x
 
-    The report MUST contain the following sections in order:
+    ## Resumen Ejecutivo
+    A high-level summary of the migration's scope, complexity, and the most critical actions required. Mention the number of processors and services analyzed.
 
-    1.  **Resumen Ejecutivo:** A high-level summary of the migration's scope, complexity, and the most critical actions required. Mention the number of processors and services analyzed.
-    2.  **Inventario de Componentes:** A summary list of the processors and controller services found in the NiFi 1.x template.
-    3.  **Plan de Migración Detallado:** This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
-    4.  **Puntos Críticos y Advertencias:** A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
-    5.  **Recomendaciones y Próximos Pasos:** A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
+    ## Inventario de Componentes
+    A summary list of the processors and controller services found in the NiFi 1.x template.
 
-    6.  **Diagrama de Flujo (Mermaid):** Un bloque de código que contenga la definición del diagrama de flujo en formato Mermaid. Este bloque debe ser fácilmente parseable por el frontend.
+    ## Plan de Migración Detallado
+    This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
 
-        ```mermaid
-        graph TD
-            A[NiFi 1.x Flow] --> B{Analyze}
-            B --> C{Map to 2.x}
-            C --> D[NiFi 2.x Flow]
-        ```
+    ## Puntos Críticos y Advertencias
+    A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
+
+    ## Recomendaciones y Próximos Pasos
+    A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
+
+    ## Diagrama de Flujo (Mermaid)
+    ```mermaid
+    graph TD
+        A[NiFi 1.x Flow] --> B{Analyze}
+        B --> C{Map to 2.x}
+        C --> D[NiFi 2.x Flow]
+    ```
 """)

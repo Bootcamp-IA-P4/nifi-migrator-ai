@@ -16,8 +16,7 @@ INDEX_DIR = os.getenv("RAG_INDEX_DIR", "data/rag_index_faiss")
 ALLOWED_EXT = {".txt", ".md", ".csv", ".xml", ".pdf"}
 
 def _embedding_model():
-    if os.getenv("OPENAI_API_KEY"):
-        return OpenAIEmbeddings()
+   
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def _chunk_text(text: str) -> List[str]:

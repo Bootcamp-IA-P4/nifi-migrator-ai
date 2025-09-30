@@ -2,6 +2,7 @@
 import React from "react";
 import { FileText, CheckCircle, AlertTriangle, Database } from "lucide-react";
 
+
 const ReportView = ({ report }) => {
   if (!report) return null;
 
@@ -48,7 +49,7 @@ const ReportView = ({ report }) => {
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
         <FileText className="text-indigo-600 w-6 h-6" />
-        <h2 className="text-2xl font-bold text-gray-900">📑 Informe Generado</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
       </div>
 
       {/* Render structured report */}

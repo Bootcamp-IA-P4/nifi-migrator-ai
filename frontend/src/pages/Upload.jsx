@@ -2,9 +2,30 @@
 import React, { useState } from "react";
 import UploadForm from "../components/UploadForm";
 import ReportView from "../components/ReportView";
+import MermaidChart from "../components/MermaidChart";
 
 const Upload = () => {
   const [report, setReport] = useState(null);
+
+  // Código de ejemplo en Mermaid
+  const chartCode = `
+  graph TD;
+      A[Ingest Source File <br><i>GetFile</i>];
+      B[Split by Line <br><i>SplitText</i>];
+      C[Route on Content Regex <br><i>RouteOnContent</i>];
+      D[Log High-Priority Action <br><i>LogAttribute</i>];
+      E[Merge Low-Priority Content <br><i>MergeContent</i>];
+      F[Log Merged Low-Priority File <br><i>LogAttribute</i>];
+
+      A -- success --> B;
+      B -- splits --> C;
+      C -- high-priority --> D;
+      C -- unmatched --> E;
+      E -- merged --> F;
+
+      classDef processor fill:#26a69a,stroke:#FFFFFF,stroke-width:2px;
+      class A,B,C,D,E,F processor;
+  `;
 
   // Descargar el reporte en JSON
   const handleDownload = () => {
@@ -56,8 +77,9 @@ const Upload = () => {
 
         {/* Report preview */}
         {report && (
-          <div className="mt-10 bg-white shadow-md rounded-xl p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mt-10 bg-white shadow-md rounded-xl p-6 border border-gray-100 space-y-8">
+            {/* Informe */}
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-800">
                 📑 Informe Generado
               </h2>
@@ -68,9 +90,15 @@ const Upload = () => {
                 ⬇️ Descargar JSON
               </button>
             </div>
-
-            {/* Renderizado con estilo */}
             <ReportView report={report} />
+
+            {/* Diagrama Mermaid */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                🔎 Visualización del Flujo
+              </h3>
+              <MermaidChart chartCode={chartCode} />
+            </div>
           </div>
         )}
       </section>

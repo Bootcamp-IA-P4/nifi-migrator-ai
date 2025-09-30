@@ -1,16 +1,11 @@
 from app.models.report import Report
 from app.agents.migration_crew import MigrationCrew 
 from . import report_parser
-
-# Este es el servicio principal que maneja la lógica de análisis y migración de NiFi.
-# recibe una petición web, la traduce para el sistema de IA, le delega todo el trabajo pesado, y luego empaqueta la respuesta de la IA para devolverla al usuario.
+from . import antipatterns
 
 def analyze_nifi_xml(xml_content: bytes) -> Report:
     try:
-        # Como los agentes trabajan con strings, primero convertimos el XML de bytes a string.
         xml_string = xml_content.decode('utf-8', errors="ignore")
-
-        # creamos una instancia del Crew de migración y le pasamos el XML que acabamos de preparar, es decir le pasamos los datos y le decimos que haga su trabajo.
         
         print("🚀 Iniciando el Crew de Migración de NiFi...")
         crew = MigrationCrew(xml_data=xml_string)
@@ -22,6 +17,11 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
         structured_report_dict = None
         try:
             structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
+            if structured_report_dict and "analisis_componentes" in structured_report_dict:
+                extra_findings = antipatterns.detectar_antipatrones(structured_report_dict["analisis_componentes"])
+                structured_report_dict["puntos_criticos"] = (
+                    structured_report_dict.get("puntos_criticos", []) + extra_findings
+                )
         except Exception as parse_err:
             print(f"No se pudo parsear el informe a JSON estructurado: {parse_err}")
         

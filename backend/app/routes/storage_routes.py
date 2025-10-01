@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, Form, HTTPException
 # Importamos la nueva función list_bucket_files
-from backend.app.services.supabase_registry import upload_file_to_bucket, insert_record, list_bucket_files
+from app.services.supabase_registry import upload_file_to_bucket, insert_record, list_bucket_files
 
 router = APIRouter()
 

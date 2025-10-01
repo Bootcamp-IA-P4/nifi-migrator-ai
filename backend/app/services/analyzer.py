@@ -1,34 +1,53 @@
-from app.models.report import Report
-from app.agents.migration_crew import MigrationCrew 
-from . import report_parser
+import os
+import uuid
+from fastapi import HTTPException
 
-# Este es el servicio principal que maneja la lógica de análisis y migración de NiFi.
-# recibe una petición web, la traduce para el sistema de IA, le delega todo el trabajo pesado, y luego empaqueta la respuesta de la IA para devolverla al usuario.
+from app.services import report_parser
+from app.orchestrator import run_migration_orchestrator
 
-def analyze_nifi_xml(xml_content: bytes) -> Report:
+# Directorio de salida para los informes, gestionado ahora por el orquestador
+OUTPUT_REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'reports')
+os.makedirs(OUTPUT_REPORT_DIR, exist_ok=True)
+
+async def analyze_nifi_xml_and_orchestrate(
+    xml_content: bytes,
+    xml_filename: str
+) -> str:
+    """
+    Función principal de servicio que recibe los datos del endpoint,
+    invoca al orquestador y maneja la generación de informes.
+
+    Args:
+        xml_content: Contenido del archivo XML en bytes.
+        xml_filename: Nombre del archivo XML original.
+
+    Returns:
+        El informe de migración en formato Markdown.
+    """
+    file_id = str(uuid.uuid4())
+    print(f"[Service] Iniciando orquestación para el flujo {file_id} con el archivo {xml_filename}...")
+
     try:
-        # Como los agentes trabajan con strings, primero convertimos el XML de bytes a string.
+        # 1. Convertir el contenido XML de bytes a string
         xml_string = xml_content.decode('utf-8', errors="ignore")
 
-        # creamos una instancia del Crew de migración y le pasamos el XML que acabamos de preparar, es decir le pasamos los datos y le decimos que haga su trabajo.
-        
-        print("🚀 Iniciando el Crew de Migración de NiFi...")
-        crew = MigrationCrew(xml_data=xml_string)
-        ai_generated_report = crew.run()
-        
-        
-        print("✅ Crew finalizado. Generando respuesta de la API...")
+        # 2. Ejecutar el orquestador (lógica principal ahora aquí)
+        # Ya no necesita la ruta del CSV, pero sí el nombre del archivo original.
+        markdown_report = run_migration_orchestrator(
+            xml_content=xml_string,
+            original_xml_filename=xml_filename
+        )
+        print(f"[Service] Orquestador finalizado para {xml_filename}.")
 
-        structured_report_dict = None
-        try:
-            structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
-        except Exception as parse_err:
-            print(f"No se pudo parsear el informe a JSON estructurado: {parse_err}")
-        
-        print("✅ Parsing completado. Generando respuesta de la API...")
-        
-        return Report(structured=structured_report_dict, raw_markdown=str(ai_generated_report))
+        # 3. La lógica de guardar archivos ya está dentro del orquestador.
 
+        # 4. Devolver el informe en Markdown a la ruta para la respuesta de la API
+        return markdown_report
+
+    except HTTPException as e:
+        # Re-lanzar excepciones HTTP para que FastAPI las maneje
+        raise e
     except Exception as e:
-        print(f"Error durante la ejecución: {e}")
-        return Report(error=f"Error fatal en el servicio: {str(e)}")
+        # Capturar cualquier otra excepción y devolver un error 500
+        print(f"[Service ERROR] Error durante el análisis y orquestación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")

@@ -44,5 +44,22 @@ def insert_record(table: str, data: dict):
     """
     Inserta un registro en la base de datos Supabase.
     """
+    # Esta función queda, aunque no la uses ahora, por si añades una tabla más tarde.
     result = supabase.table(table).insert(data).execute()
     return result.data
+
+def list_bucket_files(bucket: str = SUPABASE_BUCKET1):
+    """
+    Obtiene la lista de archivos (flujos) dentro de un bucket de Storage.
+    Por defecto usa el bucket 'history'.
+    """
+    try:
+        # Usamos list() para obtener los archivos. 'path' vacío lista la raíz del bucket.
+        result = supabase.storage.from_(bucket).list(path="", options={"limit": 100})
+        # El resultado es directamente una lista de archivos/objetos.
+        return {"status": "ok", "data": result, "bucket": bucket}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        # Nota: El error 404 si el bucket no existe
+        return {"status": "error", "detail": str(e), "bucket": bucket}

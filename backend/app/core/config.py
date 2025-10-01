@@ -13,5 +13,9 @@ class Settings:
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
     SUPABASE_BUCKET: str = os.getenv("SUPABASE_BUCKET", "nifi-docs")
-    
+    #dataset para validación
+    DATASET_PATH: str = os.getenv("DATASET_PATH", "data/migration_plan.csv")
+    # origins para CORS
+    ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",")
+
 settings = Settings()

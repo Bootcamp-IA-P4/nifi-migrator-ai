@@ -132,11 +132,16 @@ MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
     - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
 
     ### Mapeo de Propiedades
-    | Propiedad en 1.x | Valor en 1.x | Propiedad en 2.x | Valor/Acción en 2.x | Notas de Migración |
-    |------------------|--------------|------------------|---------------------|--------------------|
-    | `property_name`  | `value`      | `new_prop_name`  | `new_value`         | [Nota si es necesaria, e.g., "Revisar formato de URL"] |
-    | `another_prop`   | `old_value`  | `another_prop`   | `old_value`         | Mapeo Directo      |
-    | `deprecated_prop`| `some_value` | `(Obsoleto)`     | `(N/A)`             | Esta propiedad ha sido eliminada. La funcionalidad ahora se gestiona a través de X. |
+    - propiedad_1x: `property_name`
+      valor_1x: `value`
+      propiedad_2x: `new_prop_name`
+      valor_2x: `new_value`
+      notas: [Nota ...]
+    - propiedad_1x: `another_prop`
+      valor_1x: `old_value`
+      propiedad_2x: `another_prop`
+      valor_2x: `old_value`
+      notas: "Mapeo Directo"
     ...
 """)
 
@@ -177,8 +182,12 @@ REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
     A summary list of the processors and controller services found in the NiFi 1.x template.
 
     ## Plan de Migración Detallado
-    This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
-
+    This is the core of the report. For each component, integrate the property-by-property mapping as a **structured Markdown list** (never tables).  
+    Mandatory format:
+    - componente_nifi_1: <nombre en 1.x>
+      equivalente_nifi_2: <nombre en 2.x>
+      notas: <texto breve con estrategia de migración>
+                                        
     ## Puntos Críticos y Advertencias
     A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
 

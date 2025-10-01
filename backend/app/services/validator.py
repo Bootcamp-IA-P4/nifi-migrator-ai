@@ -1,0 +1,47 @@
+from typing import List, Dict, Any
+import csv
+
+def load_mappings(dataset_path: str) -> Dict[str, Dict[str, str]]:
+    mappings: Dict[str, Dict[str, str]] = {}
+    with open(dataset_path, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            mappings[row["nifi1_component"]] = {
+                "nifi2_equivalent": row["nifi2_equivalent"],
+                "status": row.get("status", ""),
+                "property_changes": row.get("property_changes", ""),
+                "recommended_config": row.get("recommended_config", "")
+            }
+    return mappings
+
+def validate_migration_report(components: List[Dict[str, Any]], dataset_path: str) -> Dict[str, Any]:
+    mappings = load_mappings(dataset_path)
+    total, aciertos = 0, 0
+    errores = []
+
+    for comp in components:
+        nifi1 = comp.get("componente_nifi_1")
+        nifi2 = comp.get("equivalente_nifi_2")
+        if nifi1 in mappings:
+            total += 1
+            esperado = mappings[nifi1]["nifi2_equivalent"]
+            if esperado == nifi2:
+                aciertos += 1
+            else:
+                errores.append({
+                    "componente": nifi1,
+                    "esperado": esperado,
+                    "obtenido": nifi2,
+                    "status": mappings[nifi1].get("status", ""),
+                    "property_changes": mappings[nifi1].get("property_changes", ""),
+                    "recommended_config": mappings[nifi1].get("recommended_config", "")
+                })
+
+    precision = (aciertos / total * 100) if total > 0 else 0.0
+
+    return {
+        "precision": precision,
+        "aciertos": aciertos,
+        "total": total,
+        "errores": errores
+    }

@@ -19,6 +19,8 @@ def analyze_nifi_xml(xml_content: bytes) -> Report:
             structured_report_dict = report_parser.parse_markdown_to_json(str(ai_generated_report))
             if structured_report_dict and "analisis_componentes" in structured_report_dict:
                 extra_findings = antipatterns.detectar_antipatrones(structured_report_dict["analisis_componentes"])
+                structured_report_dict["antipatrones_detectados"] = extra_findings
+
                 structured_report_dict["puntos_criticos"] = (
                     structured_report_dict.get("puntos_criticos", []) + extra_findings
                 )

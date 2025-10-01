@@ -23,45 +23,27 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
                 if item.strip().startswith(("-", "*")) or re.match(r"^\d+\.\s", item.strip())
             ]
 
-        def extract_table(md_block: str) -> List[Dict[str, str]]:
-            """Convierte tabla Markdown en lista de dicts"""
+        
+        def extract_components(md_block: str) -> List[Dict[str, str]]:
             if not md_block:
                 return []
 
-            rows = [r.strip() for r in md_block.strip().split("\n") if r.strip()]
-            if len(rows) < 2:
-                return []
-
-            headers = [h.strip().lower() for h in rows[0].split("|") if h.strip()]
-            data_rows = []
-
-            header_map = {
-                "componente nifi1": "componente_nifi_1",
-                "componente nifi 1": "componente_nifi_1",
-                "componente nifi1.x": "componente_nifi_1",  
-                "equivalente nifi2": "equivalente_nifi_2",
-                "equivalente nifi 2": "equivalente_nifi_2",
-                "equivalente nifi2.x": "equivalente_nifi_2", 
-                "notas": "notas",
-            }
-
-            start_index = 1
-            if len(rows) > 1 and set(rows[1].replace("|", "").strip()) <= {"-", " "}:
-                start_index = 2
-
-            for row in rows[start_index:]:
-                cols = [c.strip() for c in row.split("|")]
-                if not any(cols):
-                    continue
-                mapped = {}
-                for i, col in enumerate(cols):
-                    if not col:
-                        continue
-                    key = header_map.get(headers[i], headers[i]) if i < len(headers) else f"col_{i}"
-                    mapped[key] = col
-                data_rows.append(mapped)
-
-            return data_rows
+            comps = []
+            for line in md_block.splitlines():
+                match = re.match(r"[-*]\s*`?(Processor_\d+):\s*([\w]+)`?", line.strip())
+                if match:
+                    comps.append({
+                        "name": match.group(1),
+                        "type": match.group(2)
+                    })
+                else:
+                    svc = re.match(r"[-*]\s*`?([\w]+)`?", line.strip())
+                    if svc:
+                        comps.append({
+                            "name": svc.group(1),
+                            "type": svc.group(1)
+                        })
+            return comps
 
         # -------------------------
         # Extraer secciones por títulos
@@ -86,10 +68,10 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
         # -------------------------
         # Construir JSON estructurado
         # -------------------------
-
+        
         structured_data = {
             "resumen_ejecutivo": sections.get("Resumen Ejecutivo", ""),
-            "analisis_componentes": extract_table(
+            "analisis_componentes": extract_components(
                 sections.get("Análisis de Componentes", "")
                 or sections.get("Inventario de Componentes", "")
                 or sections.get("Plan de Migración Detallado", "")
@@ -100,15 +82,7 @@ def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
                 or sections.get("Recomendaciones y Próximos Pasos", "")
             ),
         }
-        
 
-        # También incluir TODAS las tablas detectadas
-        tablas_detectadas = {}
-        for title, content in sections.items():
-            if "|" in content and "---" in content:
-                tablas_detectadas[title] = extract_table(content)
-
-        # También incluir TODAS las listas detectadas
         listas_detectadas = {}
         for title, content in sections.items():
             if any(line.strip().startswith(("-", "*")) for line in content.splitlines()):

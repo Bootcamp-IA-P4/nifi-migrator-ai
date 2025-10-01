@@ -132,30 +132,84 @@ MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
     - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
 
     ### Mapeo de Propiedades
-    | Propiedad en 1.x | Valor en 1.x | Propiedad en 2.x | Valor/Acción en 2.x | Notas de Migración |
-    |------------------|--------------|------------------|---------------------|--------------------|
-    | `property_name`  | `value`      | `new_prop_name`  | `new_value`         | [Nota si es necesaria, e.g., "Revisar formato de URL"] |
-    | `another_prop`   | `old_value`  | `another_prop`   | `old_value`         | Mapeo Directo      |
-    | `deprecated_prop`| `some_value` | `(Obsoleto)`     | `(N/A)`             | Esta propiedad ha sido eliminada. La funcionalidad ahora se gestiona a través de X. |
+    - propiedad_1x: `property_name`
+      valor_1x: `value`
+      propiedad_2x: `new_prop_name`
+      valor_2x: `new_value`
+      notas: [Nota ...]
+    - propiedad_1x: `another_prop`
+      valor_1x: `old_value`
+      propiedad_2x: `another_prop`
+      valor_2x: `old_value`
+      notas: "Mapeo Directo"
     ...
 """)
 
 
 # --- Reporting Task Prompts ---
 
+REPORTER_AGENT_ROLE = "Senior Technical Writer for Migration Reports"
+REPORTER_AGENT_GOAL = dedent("""
+    Generate a comprehensive and easy-to-read migration report in Markdown format, based on the technical analysis from the migration specialist.
+""")
+REPORTER_AGENT_BACKSTORY = dedent("""
+    You are a technical writer who specializes in creating clear documentation for complex engineering projects.
+    Your skill is to take dense technical information and present it in a structured and understandable way for the developers who will execute the migration.
+""")
+
 REPORTING_TASK_DESCRIPTION = dedent("""
-    You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize the detailed component analysis and the property-level migration mapping into a single, comprehensive, and professional migration report.
+    You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize the detailed component analysis (from the Analyzer Agent) and the property-level migration mapping (from the Mapper Agent) into a single, comprehensive, and professional migration report.
     The report must be clear, well-structured, and provide actionable insights for a technical audience.
+
+    Crucially, you MUST generate TWO distinct Mermaid diagrams (using `graph TD` for a top-down flow) to visually represent the migration:
+    1.  **Original NiFi 1.x Flow Diagram:** Illustrate the main processors and controller services of the original NiFi 1.x flow, showing their connections and data flow. Use the component IDs and names from the Analyzer Agent's report.
+    2.  **Migrated NiFi 2.x Flow Diagram:** Illustrate the corresponding NiFi 2.x flow. This diagram should reflect the changes identified by the Mapper Agent, including:
+        *   Renamed components.
+        *   New equivalent components.
+        *   How deprecated/removed 1.x components are replaced or handled in 2.x (e.g., "Deprecated 1.x Processor" --> "New 2.x Approach").
+        *   Maintain connections and data flow logic.
+
+    Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
-    A final, polished migration report in Markdown, written in **Spanish**.
+    # Informe de Migración de NiFi 1.x a 2.x
 
-    The report MUST contain the following sections in order:
+    ## Resumen Ejecutivo
+    A high-level summary of the migration's scope, complexity, and the most critical actions required. Mention the number of processors and services analyzed.
 
-    1.  **Resumen Ejecutivo:** A high-level summary of the migration's scope, complexity, and the most critical actions required. Mention the number of processors and services analyzed.
-    2.  **Inventario de Componentes:** A summary list of the processors and controller services found in the NiFi 1.x template.
-    3.  **Plan de Migración Detallado:** This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
-    4.  **Puntos Críticos y Advertencias:** A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
-    5.  **Recomendaciones y Próximos Pasos:** A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
+    ## Inventario de Componentes
+    A summary list of the processors and controller services found in the NiFi 1.x template.
+
+    ## Plan de Migración Detallado
+    This is the core of the report. For each component, integrate the property-by-property mapping as a **structured Markdown list** (never tables).  
+    Mandatory format:
+    - componente_nifi_1: <nombre en 1.x>
+      equivalente_nifi_2: <nombre en 2.x>
+      notas: <texto breve con estrategia de migración>
+                                        
+    ## Puntos Críticos y Advertencias
+    A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
+
+    ## Recomendaciones y Próximos Pasos
+    A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
+
+    ## Diagrama de Flujo NiFi 1.x (Mermaid)
+    ```mermaid
+    graph TD
+        A[NiFi 1.x Component A] --> B(NiFi 1.x Component B)
+        B --> C{NiFi 1.x Decision}
+        C -->|Yes| D[NiFi 1.x Component D]
+        C -->|No| E[NiFi 1.x Component E]
+    ```
+
+    ## Diagrama de Flujo NiFi 2.x (Mermaid)
+    ```mermaid
+    graph TD
+        A_2[NiFi 2.x Component A (Renamed)] --> B_2(NiFi 2.x Component B)
+        B_2 --> C_2{NiFi 2.x Decision}
+        C_2 -->|Yes| D_2[NiFi 2.x Component D]
+        C_2 -->|No| E_2[NiFi 2.x Component E (New Approach)]
+        E_2 --> F_2[New 2.x Processor for Deprecated Functionality]
+    ```
 """)

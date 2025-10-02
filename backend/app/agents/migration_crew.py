@@ -34,9 +34,9 @@ class MigrationCrew:
             context=[analysis_task]
         )
 
-        conversion_task = tasks.conversion_task( # Nueva tarea de dev
+        conversion_task = tasks.conversion_task(
             agent=converter_agent,
-            context=[analysis_task, mapping_task] # Depende de analysis y mapping
+            context_task=mapping_task # Pasa mapping_task como context_task
         )
 
         reporting_task = tasks.reporting_task(

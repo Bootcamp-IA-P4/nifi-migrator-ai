@@ -106,43 +106,64 @@ ANALYSIS_TASK_EXPECTED_OUTPUT = dedent("""
 
 MAPPING_TASK_DESCRIPTION = dedent("""
     You are a NiFi migration expert specializing in the transition from NiFi 1.x to 2.x.
-    Using the detailed component analysis from the previous step, your task is to create a property-level migration plan for each component.
+    Using the detailed component analysis from the previous step, your task is to generate a JSON object representing the migration plan for each component.
+
+    **NiFi 1.x Component Analysis (from Analyzer Agent):**
+
+    ---
+
+    {nifi_1x_component_analysis}
+
+    ---
 
     **Mapping Requirements:**
 
-    For each Processor and Controller Service provided, you must:
-    1.  **Confirm 2.x Equivalence:** Identify the correct equivalent component type in NiFi 2.x. Note if it's a direct match, a rename (e.g., GetHTTP -> InvokeHTTP), or requires a new pattern.
-    2.  **Create a Property Migration Table:** For each component, generate a table that maps every single property from the 1.x version to its 2.x counterpart.
-        - If a property is identical, state that.
-        - If a property has been renamed, specify the new name.
-        - If a property is deprecated, mark it as "Obsoleto" and explain the new approach.
-        - If a value needs to be changed or reviewed, provide a clear "Nota de Migración".
+    For each Processor and Controller Service identified in the `NiFi 1.x Component Analysis`:
 
-    Your analysis must be precise and actionable for a developer.
+    1.  **Infer Equivalence:** Identify the correct equivalent component type in NiFi 2.x. If a direct equivalent is not found, state `null`.
+    2.  **Property Mapping:** For each property, map its 1.x name and value to its 2.x equivalent. If a property is deprecated, mark it as `deprecated` and suggest an alternative. If a property is new, add it.
+    3.  **Migration Notes:** Provide concise notes on the migration strategy for the component and its properties.
+    4.  **Status:** Assign a status like `DIRECT_MAPPING`, `RENAMED`, `DEPRECATED`, `MANUAL_REVIEW_REQUIRED`.
+
+    Your output MUST be a valid JSON object, containing a list of mapped components. DO NOT include any conversational text, explanations, or Markdown outside the JSON.
 """)
 
 MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
-    A detailed technical mapping report in Markdown, written in **Spanish**.
-
-    For each component from the context, generate a section with the following structure:
-
-    ## Plan de Migración para: [Nombre del Componente]
-    - **Componente en NiFi 1.x:** `[Tipo en 1.x]`
-    - **Equivalente en NiFi 2.x:** `[Tipo en 2.x]`
-    - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
-
-    ### Mapeo de Propiedades
-    - propiedad_1x: `property_name`
-      valor_1x: `value`
-      propiedad_2x: `new_prop_name`
-      valor_2x: `new_value`
-      notas: [Nota ...]
-    - propiedad_1x: `another_prop`
-      valor_1x: `old_value`
-      propiedad_2x: `another_prop`
-      valor_2x: `old_value`
-      notas: "Mapeo Directo"
-    ...
+{
+    "analisis_componentes": [
+        {
+            "nifi1_id": "uuid-of-component-1",
+            "nifi1_name": "My NiFi 1.x Processor",
+            "nifi1_type": "org.apache.nifi.processors.standard.GetHTTP",
+            "nifi1_properties": {
+                "URL": "http://example.com",
+                "Method": "GET"
+            },
+            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "status": "RENAMED",
+            "migration_notes": "GetHTTP was replaced by InvokeHTTP. Properties are mostly compatible.",
+            "property_mappings": [
+                {"nifi1_prop": "URL", "nifi1_value": "http://example.com", "nifi2_prop": "Remote URL", "nifi2_value": "http://example.com", "notes": "Direct mapping"},
+                {"nifi1_prop": "Method", "nifi1_value": "GET", "nifi2_prop": "HTTP Method", "nifi2_value": "GET", "notes": "Direct mapping"}
+            ]
+        },
+        {
+            "nifi1_id": "uuid-of-component-2",
+            "nifi1_name": "My Custom Processor",
+            "nifi1_type": "com.example.nifi.CustomProcessor",
+            "nifi1_properties": {
+                "CustomProperty": "Value"
+            },
+            "nifi2_equivalent_type": null,
+            "status": "MANUAL_REVIEW_REQUIRED",
+            "migration_notes": "Custom processor not found in NiFi 2.x. Requires manual review for replacement strategy.",
+            "property_mappings": []
+        }
+    ],
+    "puntos_criticos": [
+        "El procesador 'My Custom Processor' requiere revisión manual."
+    ]
+}
 """)
 
 
@@ -170,6 +191,10 @@ REPORTING_TASK_DESCRIPTION = dedent("""
         *   Maintain connections and data flow logic.
 
     Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
+
+    The context for this task includes:
+    - **Component Analysis (Markdown):** {nifi_1x_component_analysis}
+    - **Mapped Components (JSON):** {mapped_components_json}
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""

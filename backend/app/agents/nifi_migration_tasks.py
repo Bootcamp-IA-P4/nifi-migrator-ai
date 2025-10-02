@@ -5,6 +5,8 @@ from .prompts import (
     ANALYSIS_TASK_EXPECTED_OUTPUT,
     MAPPING_TASK_DESCRIPTION,
     MAPPING_TASK_EXPECTED_OUTPUT,
+    CONVERSION_TASK_DESCRIPTION,
+    CONVERSION_TASK_EXPECTED_OUTPUT,
     REPORTING_TASK_DESCRIPTION,
     REPORTING_TASK_EXPECTED_OUTPUT
 )
@@ -60,6 +62,15 @@ class NifiMigrationTasks:
             expected_output=MAPPING_TASK_EXPECTED_OUTPUT,
             agent=agent,
             context=context  # Pass the context to the Task object
+        )
+    
+    def conversion_task(self, agent, context_task: Task) -> Task:
+        """Task to generate the NiFi 2.x Mermaid diagram."""
+        return Task(
+            description=CONVERSION_TASK_DESCRIPTION,
+            expected_output=CONVERSION_TASK_EXPECTED_OUTPUT,
+            agent=agent,
+            context=[context_task],
         )
 
     def reporting_task(self, agent, context: List[Task]) -> Task:

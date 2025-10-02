@@ -7,6 +7,9 @@ from .prompts import (
     MAPPER_AGENT_ROLE,
     MAPPER_AGENT_GOAL,
     MAPPER_AGENT_BACKSTORY,
+    CONVERTER_AGENT_ROLE,
+    CONVERTER_AGENT_GOAL,
+    CONVERTER_AGENT_BACKSTORY,
     REPORTER_AGENT_ROLE,
     REPORTER_AGENT_GOAL,
     REPORTER_AGENT_BACKSTORY
@@ -34,6 +37,16 @@ class NifiMigrationAgents:
             role=MAPPER_AGENT_ROLE,
             goal=MAPPER_AGENT_GOAL,
             backstory=MAPPER_AGENT_BACKSTORY,
+            verbose=True,
+            llm=llm,
+        )
+    
+    def flow_converter(self) -> Agent:
+        """Agent that generates the new NiFi 2.x flow diagram."""
+        return Agent(
+            role=CONVERTER_AGENT_ROLE,
+            goal=CONVERTER_AGENT_GOAL,
+            backstory=CONVERTER_AGENT_BACKSTORY,
             verbose=True,
             llm=llm,
         )

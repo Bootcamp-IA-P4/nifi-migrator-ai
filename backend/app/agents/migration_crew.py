@@ -17,12 +17,13 @@ class MigrationCrew:
         agents = NifiMigrationAgents()
         tasks = NifiMigrationTasks()
 
-        # 2. Define Agents
+        # 2. Define Agents (integrando el nuevo converter_agent de dev)
         analyzer_agent = agents.nifi_xml_analyzer()
         mapper_agent = agents.migration_mapper()
+        converter_agent = agents.flow_converter() # Nuevo agente de dev
         reporter_agent = agents.report_generator()
 
-        # 3. Define Tasks with correct context and dependencies
+        # 3. Define Tasks with correct context and dependencies (integrando conversion_task de dev)
         analysis_task = tasks.analysis_task(
             agent=analyzer_agent,
             nifi_template_content=self.xml_data
@@ -33,25 +34,26 @@ class MigrationCrew:
             context=[analysis_task]
         )
 
-        reporting_task = tasks.reporting_task(
-            agent=reporter_agent,
-            context=[analysis_task, mapping_task]
+        conversion_task = tasks.conversion_task( # Nueva tarea de dev
+            agent=converter_agent,
+            context=[analysis_task, mapping_task] # Depende de analysis y mapping
         )
 
-        # 4. Assemble and run the Crew
+        reporting_task = tasks.reporting_task(
+            agent=reporter_agent,
+            context=[analysis_task, mapping_task, conversion_task] # Ahora depende también de conversion
+        )
+
+        # 4. Assemble and run the Crew (integrando el nuevo agente y tarea)
         crew = Crew(
-            agents=[analyzer_agent, mapper_agent, reporter_agent],
-            tasks=[analysis_task, mapping_task, reporting_task],
+            agents=[analyzer_agent, mapper_agent, converter_agent, reporter_agent], # Añadir converter_agent
+            tasks=[analysis_task, mapping_task, conversion_task, reporting_task], # Añadir conversion_task
             process=Process.sequential,
             verbose=True
         )
 
-        # The `kickoff` method executes the crew.
-        # The result is the output of the final task.
         final_report_markdown = crew.kickoff().raw
 
-        # After kickoff, the task objects themselves contain their outputs.
-        # We need the raw_output for the JSON mapping.
         json_mapping_output = str(mapping_task.output)
 
         return {

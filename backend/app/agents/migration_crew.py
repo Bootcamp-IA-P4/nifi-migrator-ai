@@ -11,8 +11,8 @@ class MigrationCrew:
     def __init__(self, xml_data: str):
         self.xml_data = xml_data
 
-    def run(self) -> str:
-        """Runs the migration crew and returns the final markdown report."""
+    def run(self) -> dict:
+        """Runs the migration crew and returns a dictionary with mapping JSON and final markdown report."""
         # 1. Instantiate agents and tasks
         agents = NifiMigrationAgents()
         tasks = NifiMigrationTasks()
@@ -23,24 +23,18 @@ class MigrationCrew:
         reporter_agent = agents.report_generator()
 
         # 3. Define Tasks with correct context and dependencies
-        # The `analysis_task` is the first step, taking the raw XML data.
         analysis_task = tasks.analysis_task(
             agent=analyzer_agent,
             nifi_template_content=self.xml_data
         )
 
-        # The `mapping_task` depends on the output of the `analysis_task`.
-        # Its context will be automatically populated by CrewAI.
         mapping_task = tasks.mapping_task(
             agent=mapper_agent,
-            # This task will receive the output of `analysis_task` as context
             context=[analysis_task]
         )
 
-        # The `reporting_task` depends on the outputs of both previous tasks.
         reporting_task = tasks.reporting_task(
             agent=reporter_agent,
-            # This task receives the outputs of both tasks as context
             context=[analysis_task, mapping_task]
         )
 
@@ -48,10 +42,19 @@ class MigrationCrew:
         crew = Crew(
             agents=[analyzer_agent, mapper_agent, reporter_agent],
             tasks=[analysis_task, mapping_task, reporting_task],
-            process=Process.sequential, # Tasks will run in the order they are defined
+            process=Process.sequential,
             verbose=True
         )
 
-        # The `kickoff` method executes the crew and returns the output of the final task.
-        result = crew.kickoff()
-        return result
+        # The `kickoff` method executes the crew.
+        # The result is the output of the final task.
+        final_report_markdown = crew.kickoff().raw
+
+        # After kickoff, the task objects themselves contain their outputs.
+        # We need the raw_output for the JSON mapping.
+        json_mapping_output = str(mapping_task.output)
+
+        return {
+            "json_mapping_str": json_mapping_output,
+            "markdown_report": final_report_markdown
+        }

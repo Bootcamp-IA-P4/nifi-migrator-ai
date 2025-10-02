@@ -2,11 +2,12 @@
 import React, { useState } from "react";
 import UploadForm from "../components/UploadForm";
 import ReportView from "../components/ReportView";
+import mockReport from "../data/mockReport"; // 👈 Import del mock
 
 const Upload = () => {
-  const [report, setReport] = useState(null);
+  // Usa mockReport para probar. Cámbialo a null para usar solo backend.
+  const [report, setReport] = useState(mockReport);
 
-  // Descargar el reporte en JSON
   const handleDownload = () => {
     if (!report) return;
     const element = document.createElement("a");
@@ -21,7 +22,6 @@ const Upload = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -35,7 +35,6 @@ const Upload = () => {
         </div>
       </section>
 
-      {/* Instructions */}
       <section className="max-w-4xl mx-auto px-4 -mt-10 relative z-10">
         <div className="bg-white shadow-lg rounded-2xl p-6 border border-indigo-100">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -50,11 +49,9 @@ const Upload = () => {
         </div>
       </section>
 
-      {/* Upload Form */}
       <section className="flex-grow max-w-4xl mx-auto px-4 py-12">
         <UploadForm onReport={setReport} />
 
-        {/* Report preview */}
         {report && (
           <div className="mt-10 bg-white shadow-md rounded-xl p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
@@ -69,13 +66,11 @@ const Upload = () => {
               </button>
             </div>
 
-            {/* Renderizado con estilo */}
             <ReportView report={report} />
           </div>
         )}
       </section>
 
-      {/* Tips / Help Section */}
       <section className="bg-indigo-50 py-10 border-t border-indigo-100">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h3 className="text-xl font-semibold text-indigo-800 mb-4">

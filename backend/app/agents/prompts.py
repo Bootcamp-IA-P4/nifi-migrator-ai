@@ -7,39 +7,31 @@ from textwrap import dedent
 
 ANALYZER_AGENT_ROLE = "Senior NiFi Architect"
 ANALYZER_AGENT_GOAL = dedent("""
-    Meticulously analyze the structure of a NiFi 1.x XML template.
-    Your goal is to create a complete inventory of all processors, controller services, and their connections.
+    Meticulously analyze the structure of NiFi 1.x components from an XML template. 
+    Your goal is to identify and list all processors and controller services.
 """)
 ANALYZER_AGENT_BACKSTORY = dedent("""
     You are a senior data engineer with a decade of experience building complex flows in Apache NiFi 1.x.
-    Your specialty is auditing existing architectures to identify key components and understand data flow paths. You 
-are precise, technical, and methodical.
+    Your specialty is auditing existing architectures to identify key components. You are precise, technical, and methodical.
 """)
 
 MAPPER_AGENT_ROLE = "NiFi 1.x to 2.x Migration Specialist"
 MAPPER_AGENT_GOAL = dedent("""
-    Map each NiFi 1.x component to its NiFi 2.x equivalent using a provided knowledge base (CSV).
-    You must identify required changes, flag components needing manual review, and provide detailed migration 
-guidance in JSON format.
+    Map each NiFi 1.x component to its NiFi 2.x equivalent, identifying required changes, 
+    potential incompatibilities, and deprecated components.
 """)
 MAPPER_AGENT_BACKSTORY = dedent("""
-    You are an expert consultant who has led multiple NiFi migration projects. You have a deep understanding of the 
-differences
-    between versions. You rely on your expertise to infer mappings. If a component is unknown to you,
-    you flag it for manual review. Your output must be a clean, valid JSON object.
+    You are an expert consultant who has led multiple NiFi migration projects. You have a deep understanding of the differences
+    between versions, and your goal is to provide a clear and actionable mapping guide. You don't just identify problems; you suggest solutions.
 """)
 
 REPORTER_AGENT_ROLE = "Senior Technical Writer for Migration Reports"
 REPORTER_AGENT_GOAL = dedent("""
-    Generate a comprehensive and easy-to-read migration assessment report in Markdown format.
-    The report must include a visual diagram of the original flow using Mermaid, and present the migration analysis 
-clearly.
+    Generate a comprehensive and easy-to-read migration report in Markdown format, based on the technical analysis from the migration specialist.
 """)
 REPORTER_AGENT_BACKSTORY = dedent("""
     You are a technical writer who specializes in creating clear documentation for complex engineering projects.
-    Your skill is to take dense technical information (component analysis, mappings in JSON, connections) and present
-it in a structured,
-    visually-appealing, and understandable way for the developers who will execute the migration.
+    Your skill is to take dense technical information and present it in a structured and understandable way for the developers who will execute the migration.
 """)
 
 
@@ -48,23 +40,24 @@ it in a structured,
 # --- Analysis Task Prompts ---
 
 ANALYSIS_TASK_DESCRIPTION = dedent("""
-    As a Senior NiFi Architect, your primary task is to conduct an exhaustive analysis of the provided NiFi 1.x XML 
-template.
-    You must dissect the XML to create a detailed inventory of all its components and their relationships.
+    As a Senior NiFi Architect, your primary task is to conduct an exhaustive analysis of the provided NiFi 1.x XML template.
+    You must dissect the XML to create a detailed inventory of all its components, separating them into Processors and Controller Services.
 
     **Analysis Requirements:**
 
-    1.  **Identify Processors and Controller Services:** For each `<processor>` and `<controllerService>`, extract:
+    1.  **Identify and List All Processors:** For each `<processor>` tag, you must extract:
         - **ID:** The component's versioned UUID.
         - **Name:** The user-defined name.
-        - **Type:** The full Java class path (e.g., `org.apache.nifi.processors.standard.GetHTTP`).
-        - **Properties:** A complete list of all key-value pairs within the `<properties>` tag.
+        - **Type:** The full Java class path.
+        - **Properties:** A complete list of all key-value pairs within the `<properties>` tag. This is critical. List every single property.
+        - **Purpose:** A brief, one-sentence summary of what the processor does based on its type and configuration (e.g., "Fetches data via HTTP GET from a weather API.").
 
-    2.  **Identify Connections:** For each `<connection>` tag, extract:
-        - **Source ID:** The UUID of the source component.
-        - **Destination ID:** The UUID of the destination component.
-        - **Name:** The name of the connection (often representing a relationship like "success", 
-"failure").
+    2.  **Identify and List All Controller Services:** For each `<controllerService>` tag, you must extract:
+        - **ID:** The component's versioned UUID.
+        - **Name:** The user-defined name.
+        - **Type:** The full Java class path.
+        - **Properties:** A complete list of all key-value pairs within the `<properties>` tag. Pay close attention to connection details, schema definitions, etc.
+        - **Purpose:** A brief, one-sentence summary of its function (e.g., "Provides a database connection pool for PostgreSQL.").
 
     Here is the XML content to analyze:
     ---
@@ -73,188 +66,150 @@ template.
 """)
 
 ANALYSIS_TASK_EXPECTED_OUTPUT = dedent("""
-    A comprehensive inventory report in Markdown, written in **Spanish**.\n
-    The report must have three main sections: \"Servicios de Controlador\", \"Procesadores\", and 
-\"Conexiones\".\n
-    **Estructura de Salida:**\n
-    ## Servicios de Controlador\n
-    ---\n
-    ### [Nombre del Servicio 1]\n
-    - **ID:** [ID del Servicio]\n
-    - **Tipo:** [Tipo del Servicio]\n
-    - **Propiedades:**\n
-        - `key`: `value`\n
+    A comprehensive inventory report in Markdown, written in **Spanish**.
+
+    The report must have two main sections: "Servicios de Controlador" and "Procesadores".
+
+    **Estructura de Salida:**
+
+    ## Servicios de Controlador
+    ---
+    ### [Nombre del Servicio 1]
+    - **ID:** [ID del Servicio]
+    - **Tipo:** [Tipo del Servicio]
+    - **Propósito:** [Resumen del propósito]
+    - **Propiedades:**
+        - `key`: `value`
+        - `key`: `value`
         ...
 
-    ## Procesadores\n
-    ---\n
-    ### [Nombre del Procesador 1]\n
-    - **ID:** [ID del Procesador]\n
-    - **Tipo:** [Tipo del Procesador]\n
-    - **Propiedades:**\n
-        - `key`: `value`\n
+    ### [Nombre del Servicio 2]
+    ...
+
+    ## Procesadores
+    ---
+    ### [Nombre del Procesador 1]
+    - **ID:** [ID del Procesador]
+    - **Tipo:** [Tipo del Procesador]
+    - **Propósito:** [Resumen del propósito]
+    - **Propiedades:**
+        - `key`: `value`
+        - `key`: `value`
         ...
 
-    ## Conexiones\n
-    ---\n
-    - **De:** [ID Origen] -> **A:** [ID Destino] (Relación: [Nombre Conexión])\n
-    ...\n""")
+    ### [Nombre del Procesador 2]
+    ...
+""")
 
 
 # --- Mapping Task Prompts ---
 
 MAPPING_TASK_DESCRIPTION = dedent("""
-    You are a NiFi migration expert. Your task is to map each NiFi 1.x component from the provided **concise 
-analysis** to its NiFi 2.x equivalent.
-    You will use your general knowledge of NiFi 1.x to 2.x migrations to infer a mapping for every component.
-
-    **NiFi 1.x Concise Component Analysis (from Analyzer Agent):**
-
-    ---
-
-    {nifi_1x_component_analysis}
-
-    ---
+    You are a NiFi migration expert specializing in the transition from NiFi 1.x to 2.x.
+    Using the detailed component analysis from the previous step, your task is to create a property-level migration plan for each component.
 
     **Mapping Requirements:**
 
-    For each Processor and Controller Service identified in the `NiFi 1.x Concise Component Analysis`:
+    For each Processor and Controller Service provided, you must:
+    1.  **Confirm 2.x Equivalence:** Identify the correct equivalent component type in NiFi 2.x. Note if it's a direct match, a rename (e.g., GetHTTP -> InvokeHTTP), or requires a new pattern.
+    2.  **Create a Property Migration Table:** For each component, generate a table that maps every single property from the 1.x version to its 2.x counterpart.
+        - If a property is identical, state that.
+        - If a property has been renamed, specify the new name.
+        - If a property is deprecated, mark it as "Obsoleto" and explain the new approach.
+        - If a value needs to be changed or reviewed, provide a clear "Nota de Migración".
 
-    1.  **Infer Equivalence with LLM:** Use your general knowledge of NiFi 1.x to 2.x changes to infer the 
-`nifi2_equivalent_type`, `migration_notes`, `property_changes_summary`, and `recommended_config_summary`. Set `status` 
-to "LLM_INFERRED". Set `mapping_source` to "LLM_INFERRED".
-
-    2.  **Handle Unknown Components:** If you cannot infer a plausible equivalent even with your general knowledge, set 
-`nifi2_equivalent_type` to `null` and `status` to "MANUAL_REVIEW_REQUIRED". Provide a generic note like "Componente no 
-inferido por LLM. Requiere revisión manual.". Set `mapping_source` to "NONE".
-
-    3.  **Handle Deprecated/Removed Components:** If you know from your expertise that a component was deprecated or 
-removed in NiFi 2.x without a direct replacement, set `status` to `DEPRECATED` or `REMOVED` accordingly. Provide 
-notes explaining the situation.
-
-    4.  **Extract Properties:** Include the original `nifi1_properties` as an object.
-
-    Your output MUST be a valid JSON object, containing a list of mapped components.
-    DO NOT include any conversational text, explanations, or Markdown outside the JSON.
+    Your analysis must be precise and actionable for a developer.
 """)
 
 MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
-{
-    "mapped_components": [
-        {
-            "nifi1_id": "uuid-of-component-1",
-            "nifi1_name": "My NiFi 1.x Processor",
-            "nifi1_type": "org.apache.nifi.processors.standard.GetHTTP",
-            "nifi1_properties": {
-                "URL": "http://example.com",
-                "Method": "GET"
-            },
-            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
-            "status": "LLM_INFERRED",
-            "mapping_source": "LLM_INFERRED",
-            "migration_notes": "GetHTTP fue reemplazado por InvokeHTTP. Se infiere que las propiedades son compatibles pero se recomienda revisar la configuración del proxy.",
-            "source_document": null,
-            "property_changes_summary": "Propiedades Proxy eliminadas, usar Proxy Configuration Service.",
-            "recommended_config_summary": "Usar InvokeHTTP con propiedades: HTTP Method=GET, Remote URL=https://..."
-        },
-        {
-            "nifi1_id": "uuid-of-component-2",
-            "nifi1_name": "My Custom Processor",
-            "nifi1_type": "com.example.nifi.CustomProcessor",
-            "nifi1_properties": {
-                "CustomProperty": "Value"
-            },
-            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.ExecuteScript",
-            "status": "LLM_INFERRED",
-            "mapping_source": "LLM_INFERRED",
-            "migration_notes": "Componente personalizado. Se infiere que podría ser reemplazado por ExecuteScript para lógica custom. Requiere revisión manual para confirmar la lógica.",
-            "source_document": null,
-            "property_changes_summary": "La lógica custom deberá ser reescrita en Groovy o Python.",
-            "recommended_config_summary": "Evaluar la funcionalidad del CustomProcessor y reescribirla usando ExecuteScript (Groovy) o la nueva API de Python."
-        },
-        {
-            "nifi1_id": "uuid-of-component-3",
-            "nifi1_name": "Unknown Processor",
-            "nifi1_type": "com.unknown.nifi.UnknownProcessor",
-            "nifi1_properties": {},
-            "nifi2_equivalent_type": null,
-            "status": "MANUAL_REVIEW_REQUIRED",
-            "mapping_source": "NONE",
-            "migration_notes": "Componente no inferido por LLM. Requiere revisión manual.",
-            "source_document": null,
-            "property_changes_summary": null,
-            "recommended_config_summary": null
-        }
-    ]
-}
+    A detailed technical mapping report in Markdown, written in **Spanish**.
+
+    For each component from the context, generate a section with the following structure:
+
+    ## Plan de Migración para: [Nombre del Componente]
+    - **Componente en NiFi 1.x:** `[Tipo en 1.x]`
+    - **Equivalente en NiFi 2.x:** `[Tipo en 2.x]`
+    - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
+
+    ### Mapeo de Propiedades
+    - propiedad_1x: `property_name`
+      valor_1x: `value`
+      propiedad_2x: `new_prop_name`
+      valor_2x: `new_value`
+      notas: [Nota ...]
+    - propiedad_1x: `another_prop`
+      valor_1x: `old_value`
+      propiedad_2x: `another_prop`
+      valor_2x: `old_value`
+      notas: "Mapeo Directo"
+    ...
 """)
 
 
 # --- Reporting Task Prompts ---
 
+REPORTER_AGENT_ROLE = "Senior Technical Writer for Migration Reports"
+REPORTER_AGENT_GOAL = dedent("""
+    Generate a comprehensive and easy-to-read migration report in Markdown format, based on the technical analysis from the migration specialist.
+""")
+REPORTER_AGENT_BACKSTORY = dedent("""
+    You are a technical writer who specializes in creating clear documentation for complex engineering projects.
+    Your skill is to take dense technical information and present it in a structured and understandable way for the developers who will execute the migration.
+""")
+
 REPORTING_TASK_DESCRIPTION = dedent("""
-    You are a Senior Technical Writer. Your task is to synthesize the component inventory (from the Analyzer Agent),
-    the connection data (from the Analyzer Agent), and the migration mapping plan (in JSON format from the Mapper 
-Agent)
-    into a single, comprehensive, and professional migration assessment report in Markdown format.
+    You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize the detailed component analysis (from the Analyzer Agent) and the property-level migration mapping (from the Mapper Agent) into a single, comprehensive, and professional migration report.
+    The report must be clear, well-structured, and provide actionable insights for a technical audience.
 
-    **Input Data:**
-    - **NiFi 1.x Component Analysis (Markdown):** {nifi_1x_component_analysis}
-    - **Mapped Components (JSON):** {mapped_components_json}
-    - **NiFi 1.x Connections (JSON or similar structured format):** {nifi_1x_connections}
+    Crucially, you MUST generate TWO distinct Mermaid diagrams (using `graph TD` for a top-down flow) to visually represent the migration:
+    1.  **Original NiFi 1.x Flow Diagram:** Illustrate the main processors and controller services of the original NiFi 1.x flow, showing their connections and data flow. Use the component IDs and names from the Analyzer Agent's report.
+    2.  **Migrated NiFi 2.x Flow Diagram:** Illustrate the corresponding NiFi 2.x flow. This diagram should reflect the changes identified by the Mapper Agent, including:
+        *   Renamed components.
+        *   New equivalent components.
+        *   How deprecated/removed 1.x components are replaced or handled in 2.x (e.g., "Deprecated 1.x Processor" --> "New 2.x Approach").
+        *   Maintain connections and data flow logic.
 
-    **Report Generation Requirements:**
-
-    1.  **Structure the Report:** Follow the structure defined in the "Expected Output".
-    2.  **Generate Mermaid Diagram:** Using the **component IDs and names** from the `NiFi 1.x Component Analysis` and
-the `NiFi 1.x Connections` data, create a Mermaid `graph TD` diagram that visually represents the NiFi 1.x flow. The 
-diagram should use the component names as labels for the nodes, and IDs for internal referencing.
-    3.  **Integrate Mapped Components:** Create a detailed table in Markdown for the "Plan de Migración Detallado" 
-section, using the `mapped_components_json` data. Ensure all relevant fields (NiFi 1.x Type, NiFi 2.x Equivalent, 
-Status, Migration Notes, etc.) are clearly presented.
-    4.  **Highlight Critical Points:** Extract all components with `status` "MANUAL_REVIEW_REQUIRED", 
-"DEPRECATED", or "REMOVED" from the `mapped_components_json` and list them under "Puntos Críticos y 
-Advertencias".
-
-    The final output MUST be a single, clean Markdown document.
+    Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
-# Informe de Asesoramiento de Migración de NiFi 1.x a 2.x
+    # Informe de Migración de NiFi 1.x a 2.x
 
-## Resumen del Flujo Analizado
-- **Número de Procesadores:** [Contar procesadores]
-- **Número de Servicios de Controlador:** [Contar servicios]
+    ## Resumen Ejecutivo
+    A high-level summary of the migration's scope, complexity, and the most critical actions required. Mention the number of processors and services analyzed.
 
-## Diagrama de Flujo (NiFi 1.x)
-```mermaid
-graph TD
-    id1[Nombre Procesador 1] --> |Relación| id2[Nombre Procesador 2]
-    id2 --> id3[Nombre Procesador 3]
-    classDef processor fill:#26a69a,stroke:#FFFFFF,stroke-width:2px;
-    class id1,id2,id3 processor;
-```
+    ## Inventario de Componentes
+    A summary list of the processors and controller services found in the NiFi 1.x template.
 
-## Plan de Migración Detallado
----
-| Componente NiFi 1.x (Tipo) | Equivalente NiFi 2.x (Tipo) | Estado | Notas de Migración | Documentación Fuente |
-|----------------------------|-----------------------------|--------|--------------------|----------------------|
-| `org.apache.nifi.processors.standard.GetHTTP` | `org.apache.nifi.processors.standard.InvokeHTTP` | LLM_INFERRED 
-| GetHTTP fue reemplazado por InvokeHTTP. Ajustar propiedades. | `null` |
-| `com.example.nifi.CustomProcessor` | `null` | MANUAL_REVIEW_REQUIRED | Componente no encontrado en la base de 
-conocimiento. Requiere revisión manual. | `null` |
-...
+    ## Plan de Migración Detallado
+    This is the core of the report. For each component, integrate the property-by-property mapping as a **structured Markdown list** (never tables).  
+    Mandatory format:
+    - componente_nifi_1: <nombre en 1.x>
+      equivalente_nifi_2: <nombre en 2.x>
+      notas: <texto breve con estrategia de migración>
+                                        
+    ## Puntos Críticos y Advertencias
+    A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
 
-## Puntos Críticos y Advertencias
-### Componentes que Requieren Revisión Manual:
-- **My Custom Processor (`com.example.nifi.CustomProcessor`):** Componente no encontrado en la base de conocimiento. 
-Requiere revisión manual.
-### Componentes Obsoletos o Eliminados:
-- **Deprecated Processor (`org.apache.nifi.processors.processors.standard.ConvertJSONToSQL`):** Se infiere que este componente ha sido eliminado.
+    ## Recomendaciones y Próximos Pasos
+    A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
 
-## Próximos Pasos Recomendados
-1.  Revisar los componentes marcados para **revisión manual** y definir una estrategia de migración para cada uno.
-2.  Planificar la reimplementación de la funcionalidad de los componentes **obsoletos** o **eliminados**.
-3.  Proceder con la creación de los flujos en NiFi 2.x para los componentes con **mapeo automático**.
-4.  Consultar la documentación fuente proporcionada para cada componente para detalles adicionales.
+    ## Diagrama de Flujo NiFi 1.x (Mermaid)
+    ```mermaid
+    graph TD
+        A[NiFi 1.x Component A] --> B(NiFi 1.x Component B)
+        B --> C{NiFi 1.x Decision}
+        C -->|Yes| D[NiFi 1.x Component D]
+        C -->|No| E[NiFi 1.x Component E]
+    ```
+
+    ## Diagrama de Flujo NiFi 2.x (Mermaid)
+    ```mermaid
+    graph TD
+        A_2[NiFi 2.x Component A (Renamed)] --> B_2(NiFi 2.x Component B)
+        B_2 --> C_2{NiFi 2.x Decision}
+        C_2 -->|Yes| D_2[NiFi 2.x Component D]
+        C_2 -->|No| E_2[NiFi 2.x Component E (New Approach)]
+        E_2 --> F_2[New 2.x Processor for Deprecated Functionality]
+    ```
 """)

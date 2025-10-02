@@ -18,17 +18,19 @@ class MigrationCrew:
         # Definimos los agentes
         analyzer_agent = agents.nifi_xml_analyzer()
         mapper_agent = agents.migration_mapper()
+        converter_agent = agents.flow_converter()
         reporter_agent = agents.report_generator()
 
         # Definimos las tareas y las encadenamos
         analysis = tasks.analysis_task(analyzer_agent, self.xml_data)
         mapping = tasks.mapping_task(mapper_agent, analysis)
-        reporting = tasks.reporting_task(reporter_agent, mapping)
+        conversion = tasks.conversion_task(converter_agent, mapping)
+        reporting = tasks.reporting_task(reporter_agent, conversion)
 
         # Formar el Crew con un proceso secuencial
         crew = Crew(
-            agents=[analyzer_agent, mapper_agent, reporter_agent],
-            tasks=[analysis, mapping, reporting],
+            agents=[analyzer_agent, mapper_agent, converter_agent, reporter_agent],
+            tasks=[analysis, mapping, conversion , reporting],
             process=Process.sequential,
             verbose=True,
         )

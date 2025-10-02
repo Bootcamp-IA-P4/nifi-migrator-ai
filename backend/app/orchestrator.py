@@ -1,55 +1,54 @@
 import os
-from .agents.migration_crew import MigrationCrew
+import json
+from app.agents.migration_crew import MigrationCrew
 
-# Define el directorio de salida para los informes
-OUTPUT_REPORT_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'reports')
+OUTPUT_REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'reports')
 os.makedirs(OUTPUT_REPORT_DIR, exist_ok=True)
 
-def run_migration_orchestrator(xml_content: str, original_xml_filename: str) -> str:
+def run_migration_orchestrator(xml_content: str, original_xml_filename: str) -> dict:
     """
-    Orquesta la ejecución de la Crew de migración y guarda el informe resultante.
-
-    Args:
-        xml_content: El contenido del archivo XML de NiFi 1.x como una cadena.
-        original_xml_filename: El nombre del archivo XML original para nombrar el informe.
+    Ejecuta la crew de migración y devuelve un diccionario con los resultados.
 
     Returns:
-        El informe de migración en formato Markdown como una cadena.
+        Un diccionario con el mapeo en JSON y el informe final en Markdown.
+        {
+            "json_mapping": dict,
+            "markdown_report": str
+        }
     """
-    print("[Orchestrator] Iniciando el proceso de migración...")
+    print(f"[Orchestrator] Iniciando para el archivo {original_xml_filename}...")
 
-    # 1. Instanciar la Crew de Migración (ya no necesita el CSV)
-    migration_crew_instance = MigrationCrew(xml_data=xml_content)
-
-    # 2. Ejecutar la Crew
-    print("[Orchestrator] Ejecutando la Crew de Migración...")
-    crew_output = migration_crew_instance.run()
-    print("[Orchestrator] Crew de Migración finalizada.")
-
-    # 3. Extraer el informe en bruto del objeto de salida y verificarlo
-    result_markdown_report = crew_output.raw if crew_output else None
-    
-    if not result_markdown_report or not isinstance(result_markdown_report, str):
-        print("[Orchestrator ERROR] La ejecución de la crew no produjo un informe en Markdown válido.")
-        raise ValueError("El resultado de la Crew está vacío o no es texto. No se puede generar el informe.")
-
-    # 4. Guardar el informe Markdown, usando el nombre del archivo original
-    report_filename = os.path.basename(original_xml_filename).replace('.xml', '_migration_report.md')
-    report_path = os.path.join(OUTPUT_REPORT_DIR, report_filename)
     try:
+        # 1. Inicializar la crew con los datos del XML
+        migration_crew = MigrationCrew(xml_data=xml_content)
+
+        # 2. Ejecutar la crew. El resultado es un diccionario con ambos outputs.
+        crew_results = migration_crew.run()
+        markdown_report = crew_results["markdown_report"]
+        json_mapping_str = crew_results["json_mapping_str"]
+        print("[Orchestrator] Crew finalizada. Procesando resultados...")
+
+        # 3. Parsear el string JSON a un diccionario de Python
+        try:
+            json_mapping = json.loads(json_mapping_str)
+        except json.JSONDecodeError:
+            print("[Orchestrator ERROR] La salida del agente de mapeo no es un JSON válido.")
+            json_mapping = {"error": "Failed to parse mapping agent output", "raw_output": json_mapping_str}
+
+
+        # 4. Guardar el informe Markdown en un archivo
+        report_filename = f"report-{os.path.splitext(original_xml_filename)[0]}.md"
+        report_path = os.path.join(OUTPUT_REPORT_DIR, report_filename)
         with open(report_path, 'w', encoding='utf-8') as f:
-            f.write(result_markdown_report)
-        print(f"[Orchestrator] Informe Markdown guardado en: {report_path}")
+            f.write(markdown_report)
+        print(f"[Orchestrator] Informe guardado en: {report_path}")
+
+        # 5. Devolver ambos resultados
+        return {
+            "json_mapping": json_mapping,
+            "markdown_report": markdown_report
+        }
+
     except Exception as e:
-        print(f"[Orchestrator ERROR] Error al guardar el informe Markdown: {e}")
-        # A pesar del error al guardar, devolvemos el informe para que la API no falle
-        return result_markdown_report
-
-    # TODO: La conversión a PDF se puede añadir aquí si es necesario.
-
-    print("[Orchestrator] Proceso de orquestación completado.")
-    return result_markdown_report
-
-if __name__ == "__main__":
-    # Esta sección es para pruebas locales y necesita ser actualizada si se usa.
-    print("Para pruebas locales, ejecute la aplicación FastAPI y use el endpoint /analyze.")
+        print(f"[Orchestrator ERROR] Ha ocurrido un error inesperado: {e}")
+        raise

@@ -2,15 +2,36 @@ import os
 from supabase import create_client
 import re
 import unicodedata
+from dotenv import load_dotenv
+import os
+
+
+# Cargar .env
+load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")  # 👈 solo usamos esta
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("⚠️ SUPABASE_URL o SUPABASE_KEY no están configurados")
+
 
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "nifi-docs")
 SUPABASE_BUCKET1 = os.getenv("SUPABASE_BUCKET1", "history")
-
+SUPABASE_BUCKET2 = os.getenv("SUPABASE_BUCKET2", "flow")
 # Cliente con clave anónima
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
 
 
 def sanitize_filename(filename: str) -> str:

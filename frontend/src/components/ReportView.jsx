@@ -25,11 +25,15 @@ const ReportView = ({ report }) => {
       {items.map((item, idx) => {
         let content = "";
         if (typeof item === "object" && item !== null) {
-          if (item.name && item.type) {
-            content = `${item.name} (${item.type})`;
+          // --- INICIO DE LA MODIFICACIÓN ---
+          // Adaptado para reconocer los campos del nuevo backend (nifi1_name)
+          // y mostrar un resumen simple en una sola línea, manteniendo el estilo.
+          if (item.nifi1_name && item.nifi1_type) {
+            content = `${item.nifi1_name} | Tipo: ${item.nifi1_type} | Estado: ${item.status}`;
           } else {
             content = JSON.stringify(item);
           }
+          // --- FIN DE LA MODIFICACIÓN ---
         } else {
           content = String(item);
         }
@@ -55,26 +59,13 @@ const ReportView = ({ report }) => {
 
   // --- Extraer diagramas Mermaid ---
   let diagramas = [];
-
-  // 1) Si structured trae algo (opcional)
-  if (report?.structured?.diagrama_flujo) {
-    diagramas.push(report.structured.diagrama_flujo.toString().trim());
-  }
-
-  // 2) Buscar en raw_markdown
   if (report?.raw_markdown) {
     const markdownText = Array.isArray(report.raw_markdown)
       ? report.raw_markdown.join("\n")
       : String(report.raw_markdown);
-
-    console.log("📜 raw_markdown recibido:", markdownText);
-
-    // Captura todos los bloques ```mermaid ... ```
     const matches = [...markdownText.matchAll(/```mermaid([\s\S]*?)```/g)];
     diagramas = matches.map((m) => m[1].trim());
   }
-
-  console.log("📊 Diagramas extraídos:", diagramas);
 
   const hasStructured =
     resumen ||

@@ -1,4 +1,5 @@
 from textwrap import dedent
+from .nifi_mapper_schema import CLEAN_MAPPING_TASK_DESCRIPTION # Importar la descripción limpia
 
 # In all prompts, we use English for the LLM's instructions and Spanish for the desired output format,
 # as this generally yields better and more structured results with current models.
@@ -104,66 +105,30 @@ ANALYSIS_TASK_EXPECTED_OUTPUT = dedent("""
 
 # --- Mapping Task Prompts ---
 
-MAPPING_TASK_DESCRIPTION = dedent("""
-    You are a NiFi migration expert specializing in the transition from NiFi 1.x to 2.x.
-    Using the detailed component analysis from the previous step, your task is to generate a JSON object representing the migration plan for each component.
-
-    **NiFi 1.x Component Analysis (from Analyzer Agent):**
-
-    ---
-
-    {nifi_1x_component_analysis}
-
-    ---
-
-    **Mapping Requirements:**
-
-    For each Processor and Controller Service identified in the `NiFi 1.x Component Analysis`:
-
-    1.  **Infer Equivalence:** Identify the correct equivalent component type in NiFi 2.x. If a direct equivalent is not found, state `null`.
-    2.  **Property Mapping:** For each property, map its 1.x name and value to its 2.x equivalent. If a property is deprecated, mark it as `deprecated` and suggest an alternative. If a property is new, add it.
-    3.  **Migration Notes:** Provide concise notes on the migration strategy for the component and its properties.
-    4.  **Status:** Assign a status like `DIRECT_MAPPING`, `RENAMED`, `DEPRECATED`, `MANUAL_REVIEW_REQUIRED`.
-
-    Your output MUST be a valid JSON object, containing a list of mapped components. DO NOT include any conversational text, explanations, or Markdown outside the JSON.
-""")
+MAPPING_TASK_DESCRIPTION = CLEAN_MAPPING_TASK_DESCRIPTION # Usar la descripción limpia
 
 MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
+```json
 {
     "analisis_componentes": [
         {
-            "nifi1_id": "uuid-of-component-1",
-            "nifi1_name": "My NiFi 1.x Processor",
-            "nifi1_type": "org.apache.nifi.processors.standard.GetHTTP",
-            "nifi1_properties": {
-                "URL": "http://example.com",
-                "Method": "GET"
-            },
-            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
-            "status": "RENAMED",
-            "migration_notes": "GetHTTP was replaced by InvokeHTTP. Properties are mostly compatible.",
-            "property_mappings": [
-                {"nifi1_prop": "URL", "nifi1_value": "http://example.com", "nifi2_prop": "Remote URL", "nifi2_value": "http://example.com", "notes": "Direct mapping"},
-                {"nifi1_prop": "Method", "nifi1_value": "GET", "nifi2_prop": "HTTP Method", "nifi2_value": "GET", "notes": "Direct mapping"}
-            ]
+            "nifi1_name": "DBCPConnectionPool",
+            "nifi1_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "nifi2_equivalent_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "status": "DIRECT_MAPPING"
         },
         {
-            "nifi1_id": "uuid-of-component-2",
-            "nifi1_name": "My Custom Processor",
-            "nifi1_type": "com.example.nifi.CustomProcessor",
-            "nifi1_properties": {
-                "CustomProperty": "Value"
-            },
-            "nifi2_equivalent_type": null,
-            "status": "MANUAL_REVIEW_REQUIRED",
-            "migration_notes": "Custom processor not found in NiFi 2.x. Requires manual review for replacement strategy.",
-            "property_mappings": []
+            "nifi1_name": "InvokeHTTP",
+            "nifi1_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "status": "COMPATIBLE"
         }
     ],
     "puntos_criticos": [
-        "El procesador 'My Custom Processor' requiere revisión manual."
+        "El procesador 'PutFile' requiere verificación manual de la ruta de directorio."
     ]
 }
+```
 """)
 # Tareas para probar el agente conversor:
 CONVERSION_TASK_DESCRIPTION = dedent("""
@@ -221,15 +186,11 @@ REPORTING_TASK_DESCRIPTION = dedent("""
 
     You MUST generate a Mermaid diagram for the **Original NiFi 1.x Flow** based on the initial analysis.
 
-<<<<<<< HEAD
     Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
 
     The context for this task includes:
     - **Component Analysis (Markdown):** {nifi_1x_component_analysis}
     - **Mapped Components (JSON):** {mapped_components_json}
-=======
-    You will receive the already generated Mermaid diagram for the **Migrated NiFi 2.x Flow** from the Converter Agent. You must include it directly in the final report under the appropriate section.
->>>>>>> origin/dev
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""

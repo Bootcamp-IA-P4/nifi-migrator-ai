@@ -9,6 +9,8 @@ class Settings:
     VERSION: str = "0.1.0"
     DEBUG: bool = True
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    TOGETHERAI_API_KEY: str = os.getenv("TOGETHERAI_API_KEY", "")
     #supabase :
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")

@@ -4,7 +4,7 @@ import litellm
 import re # Importar el módulo re para expresiones regulares
 from app.agents.migration_crew import MigrationCrew
 
-OUTPUT_REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'reports')
+OUTPUT_REPORT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'reports')
 os.makedirs(OUTPUT_REPORT_DIR, exist_ok=True)
 
 def run_migration_orchestrator(xml_content: str, original_xml_filename: str) -> dict:

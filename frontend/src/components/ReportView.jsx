@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText, CheckCircle, AlertTriangle, Database } from "lucide-react";
 import MermaidChart from "./MermaidChart";
+import { sanitizeMermaid } from "../utils/MermaidSanitizer";
 
 const ReportView = ({ report }) => {
   if (!report) return null;
@@ -53,15 +54,13 @@ const ReportView = ({ report }) => {
   const recomendaciones = safeArray(report?.structured?.recomendaciones);
   const puntosCriticos = safeArray(report?.structured?.puntos_criticos);
 
-  // --- Extraer diagramas Mermaid ---
+  // --- Extraer y limpiar diagramas Mermaid ---
   let diagramas = [];
 
-  // 1) Si structured trae algo (opcional)
   if (report?.structured?.diagrama_flujo) {
-    diagramas.push(report.structured.diagrama_flujo.toString().trim());
+    diagramas.push(sanitizeMermaid(report.structured.diagrama_flujo.toString()));
   }
 
-  // 2) Buscar en raw_markdown
   if (report?.raw_markdown) {
     const markdownText = Array.isArray(report.raw_markdown)
       ? report.raw_markdown.join("\n")
@@ -69,12 +68,11 @@ const ReportView = ({ report }) => {
 
     console.log("📜 raw_markdown recibido:", markdownText);
 
-    // Captura todos los bloques ```mermaid ... ```
     const matches = [...markdownText.matchAll(/```mermaid([\s\S]*?)```/g)];
-    diagramas = matches.map((m) => m[1].trim());
+    diagramas = matches.map((m) => sanitizeMermaid(m[1]));
   }
 
-  console.log("📊 Diagramas extraídos:", diagramas);
+  console.log("📊 Diagramas limpios:", diagramas);
 
   const hasStructured =
     resumen ||
@@ -88,7 +86,7 @@ const ReportView = ({ report }) => {
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
         <FileText className="text-indigo-600 w-6 h-6" />
-        <h2 className="text-2xl font-bold text-gray-900">📑 Informe Generado</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
       </div>
 
       {resumen &&

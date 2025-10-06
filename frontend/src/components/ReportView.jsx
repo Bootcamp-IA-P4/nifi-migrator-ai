@@ -20,6 +20,13 @@ const ReportView = ({ report }) => {
     </div>
   );
 
+  const statusTranslations = {
+    DIRECT_MAPPING: "Equivalencia Directa",
+    NEEDS_REVIEW: "Requiere Revisión",
+    DEPRECATED: "Obsoleto",
+    REPLACEMENT_FOUND: "Reemplazo Encontrado",
+  };
+
   const renderList = (items, color, Icon) => (
     <ul className="space-y-2">
       {items.map((item, idx) => {
@@ -29,7 +36,8 @@ const ReportView = ({ report }) => {
           // Adaptado para reconocer los campos del nuevo backend (nifi1_name)
           // y mostrar un resumen simple en una sola línea, manteniendo el estilo.
           if (item.nifi1_name && item.nifi1_type) {
-            content = `${item.nifi1_name} | Tipo: ${item.nifi1_type} | Estado: ${item.status}`;
+            const friendlyStatus = statusTranslations[item.status] || item.status;
+            content = `${item.nifi1_name} | Tipo: ${item.nifi1_type} | Estado: ${friendlyStatus}`;
           } else {
             content = JSON.stringify(item);
           }

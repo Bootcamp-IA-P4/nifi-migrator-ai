@@ -2,6 +2,7 @@ from crewai import Agent, Task, Crew, Process
 from app.core.llms import llm_validator
 import csv
 import json
+import re
 from app.agents.audit_prompts import (
     AUDITOR_AGENT_ROLE,
     AUDITOR_AGENT_GOAL,
@@ -14,7 +15,7 @@ def load_mappings_as_text(dataset_path: str) -> str:
     mappings_text = "nifi1_component,nifi2_equivalent,status,property_changes,recommended_config\n"
     with open(dataset_path, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
-        next(reader)  # Omitir la cabecera
+        next(reader)  
         for row in reader:
             mappings_text += ",".join(row) + "\n"
     return mappings_text
@@ -51,11 +52,24 @@ def run_audit(report_content: str, dataset_path: str) -> dict:
     result = audit_crew.kickoff()
 
     try:
-        return json.loads(result.raw)
+        json_match = re.search(r"```json\s*(\{.*?\})\s*```", result.raw, re.DOTALL)
+        
+        json_string = ""
+        if json_match:
+            json_string = json_match.group(1)
+        else:
+            json_string = result.raw
+
+        return json.loads(json_string)
+    
     except json.JSONDecodeError:
+        print(f"[Auditor ERROR] No se pudo parsear la salida del LLM. Salida cruda:\n{result.raw}")
         return {
             "final_verdict": "Error",
-            "overall_summary": "The auditor agent failed to produce a valid JSON output.",
+            "overall_summary": "The auditor agent failed to produce a valid JSON output. See the raw output for details.",
             "positive_points": [],
-            "points_for_improvement": [result] 
+            "points_for_improvement": [
+                "Could not parse the AI's response. The raw output was:",
+                result.raw
+            ] 
         }

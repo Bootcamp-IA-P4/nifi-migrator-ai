@@ -16,7 +16,7 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
-def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str = settings.SUPABASE_BUCKET):
+def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str):
     try:
         safe_name = sanitize_filename(file_name)
 
@@ -60,7 +60,7 @@ def list_bucket_files(bucket: str = settings.SUPABASE_BUCKET1):
         return {"status": "error", "detail": str(e), "bucket": bucket}
 
 # esta función nos sirve para obtener el contenido de un informe
-def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUCKET1) -> str | None:
+def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUCKET_REPORTS) -> str | None:
     try:
         response = supabase.storage.from_(bucket).download(report_id)
         return response.decode('utf-8')

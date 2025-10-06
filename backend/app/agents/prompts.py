@@ -1,4 +1,5 @@
 from textwrap import dedent
+from .nifi_mapper_schema import CLEAN_MAPPING_TASK_DESCRIPTION # Importar la descripción limpia
 
 # In all prompts, we use English for the LLM's instructions and Spanish for the desired output format,
 # as this generally yields better and more structured results with current models.
@@ -104,45 +105,30 @@ ANALYSIS_TASK_EXPECTED_OUTPUT = dedent("""
 
 # --- Mapping Task Prompts ---
 
-MAPPING_TASK_DESCRIPTION = dedent("""
-    You are a NiFi migration expert specializing in the transition from NiFi 1.x to 2.x.
-    Using the detailed component analysis from the previous step, your task is to create a property-level migration plan for each component.
-
-    **Mapping Requirements:**
-
-    For each Processor and Controller Service provided, you must:
-    1.  **Confirm 2.x Equivalence:** Identify the correct equivalent component type in NiFi 2.x. Note if it's a direct match, a rename (e.g., GetHTTP -> InvokeHTTP), or requires a new pattern.
-    2.  **Create a Property Migration Table:** For each component, generate a table that maps every single property from the 1.x version to its 2.x counterpart.
-        - If a property is identical, state that.
-        - If a property has been renamed, specify the new name.
-        - If a property is deprecated, mark it as "Obsoleto" and explain the new approach.
-        - If a value needs to be changed or reviewed, provide a clear "Nota de Migración".
-
-    Your analysis must be precise and actionable for a developer.
-""")
+MAPPING_TASK_DESCRIPTION = CLEAN_MAPPING_TASK_DESCRIPTION # Usar la descripción limpia
 
 MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
-    A detailed technical mapping report in Markdown, written in **Spanish**.
-
-    For each component from the context, generate a section with the following structure:
-
-    ## Plan de Migración para: [Nombre del Componente]
-    - **Componente en NiFi 1.x:** `[Tipo en 1.x]`
-    - **Equivalente en NiFi 2.x:** `[Tipo en 2.x]`
-    - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
-
-    ### Mapeo de Propiedades
-    - propiedad_1x: `property_name`
-      valor_1x: `value`
-      propiedad_2x: `new_prop_name`
-      valor_2x: `new_value`
-      notas: [Nota ...]
-    - propiedad_1x: `another_prop`
-      valor_1x: `old_value`
-      propiedad_2x: `another_prop`
-      valor_2x: `old_value`
-      notas: "Mapeo Directo"
-    ...
+```json
+{
+    "analisis_componentes": [
+        {
+            "nifi1_name": "DBCPConnectionPool",
+            "nifi1_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "nifi2_equivalent_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "status": "DIRECT_MAPPING"
+        },
+        {
+            "nifi1_name": "InvokeHTTP",
+            "nifi1_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "status": "COMPATIBLE"
+        }
+    ],
+    "puntos_criticos": [
+        "El procesador 'PutFile' requiere verificación manual de la ruta de directorio."
+    ]
+}
+```
 """)
 # Tareas para probar el agente conversor:
 CONVERSION_TASK_DESCRIPTION = dedent("""
@@ -200,7 +186,11 @@ REPORTING_TASK_DESCRIPTION = dedent("""
 
     You MUST generate a Mermaid diagram for the **Original NiFi 1.x Flow** based on the initial analysis.
 
-    You will receive the already generated Mermaid diagram for the **Migrated NiFi 2.x Flow** from the Converter Agent. You must include it directly in the final report under the appropriate section.
+    Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
+
+    The context for this task includes:
+    - **Component Analysis (Markdown):** {nifi_1x_component_analysis}
+    - **Mapped Components (JSON):** {mapped_components_json}
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""

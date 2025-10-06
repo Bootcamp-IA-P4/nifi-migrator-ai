@@ -1,6 +1,64 @@
 import re
 from typing import Dict, Any, List
+import os
 
+# Importar librería para PDF. Ejemplo con WeasyPrint (requiere instalación)
+# from weasyprint import HTML
+
+def convert_markdown_to_pdf(markdown_content: str, output_path: str):
+    """
+    Convierte contenido Markdown a un archivo PDF.
+    Requiere una librería de terceros como WeasyPrint o wkhtmltopdf.
+    """
+    try:
+        # --- Placeholder para la lógica de conversión a PDF ---
+        # Para una implementación real, necesitarías una librería como WeasyPrint o un wrapper de wkhtmltopdf.
+        # Ejemplo con WeasyPrint (asegúrate de instalarlo: pip install WeasyPrint)
+        # HTML(string=markdown_content).write_pdf(output_path)
+
+        # Para el MVP, podemos guardar el Markdown como un archivo HTML temporal y luego convertirlo
+        # o simplemente indicar que la integración de la librería va aquí.
+        
+        # Por ahora, simulamos la conversión guardando el Markdown como un archivo de texto
+        # y dejando un TODO para la integración real de PDF.
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(f"# Informe PDF (simulado)\n\n" + markdown_content)
+        print(f"[PDF Converter] Markdown guardado como archivo de texto simulando PDF en: {output_path}")
+        print("[PDF Converter] TODO: Integrar una librería real (ej. WeasyPrint) para la conversión a PDF.")
+
+    except Exception as e:
+        print(f"Error al convertir Markdown a PDF: {e}")
+        raise
+
+
+def extract_components_from_analyzer_markdown(markdown_report: str) -> str:
+    """
+    Extrae una representación concisa de los procesadores y servicios de controlador
+    del informe Markdown generado por el ANALYZER_AGENT.
+    """
+    components_summary = []
+    current_section = None
+
+    for line in markdown_report.splitlines():
+        if line.startswith("## Servicios de Controlador"):
+            current_section = "controller_services"
+            components_summary.append("## Servicios de Controlador")
+        elif line.startswith("## Procesadores"):
+            current_section = "processors"
+            components_summary.append("## Procesadores")
+        elif line.startswith("## Conexiones"):
+            current_section = None # Ignorar conexiones para el mapeador
+        elif current_section and line.strip().startswith("### "):
+            # Extraer nombre y tipo del componente
+            name = line.strip().replace("### ", "")
+            components_summary.append(f"### {name}")
+        elif current_section and line.strip().startswith("- **ID:**"):
+            components_summary.append(line.strip())
+        elif current_section and line.strip().startswith("- **Tipo:**"):
+            components_summary.append(line.strip())
+        # Podríamos añadir más lógica para propiedades clave si el mapeador las necesita
+
+    return "\n".join(components_summary)
 
 def parse_markdown_to_json(markdown_text: str) -> Dict[str, Any]:
     """

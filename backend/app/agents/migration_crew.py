@@ -1,40 +1,62 @@
-from crewai import Crew, Process
+from crewai import Crew, Process, Task
 from .nifi_migration_agents import NifiMigrationAgents
 from .nifi_migration_tasks import NifiMigrationTasks
 
-# Este archivo es el que orquesta todo el proceso de migraciÃ³n usando CrewAI, llama al archivo de agentes, asigna el trabajo con tasks
-# Crea el Crew y le dice que el proceso es secuencial, es decir que un agente no puede empezar hasta que el anterior haya terminado, y 
-# finalmente arranca el proceso con kickoff()
-
 class MigrationCrew:
+    """Orchestrates the migration process using a CrewAI team.
+
+    This class sets up the agents and tasks, defines their relationships,
+    and runs the sequential process to generate a migration report.
+    """
     def __init__(self, xml_data: str):
         self.xml_data = xml_data
 
-    def run(self):
-        # Llamamos a los agentes y las tareas
+    def run(self) -> dict:
+        """Runs the migration crew and returns a dictionary with mapping JSON and final markdown report."""
+        # 1. Instantiate agents and tasks
         agents = NifiMigrationAgents()
         tasks = NifiMigrationTasks()
 
-        # Definimos los agentes
+        # 2. Define Agents (integrando el nuevo converter_agent de dev)
         analyzer_agent = agents.nifi_xml_analyzer()
         mapper_agent = agents.migration_mapper()
-        converter_agent = agents.flow_converter()
+        converter_agent = agents.flow_converter() # Nuevo agente de dev
         reporter_agent = agents.report_generator()
 
-        # Definimos las tareas y las encadenamos
-        analysis = tasks.analysis_task(analyzer_agent, self.xml_data)
-        mapping = tasks.mapping_task(mapper_agent, analysis)
-        conversion = tasks.conversion_task(converter_agent, mapping)
-        reporting = tasks.reporting_task(reporter_agent, conversion)
-
-        # Formar el Crew con un proceso secuencial
-        crew = Crew(
-            agents=[analyzer_agent, mapper_agent, converter_agent, reporter_agent],
-            tasks=[analysis, mapping, conversion , reporting],
-            process=Process.sequential,
-            verbose=True,
+        # 3. Define Tasks with correct context and dependencies (integrando conversion_task de dev)
+        analysis_task = tasks.analysis_task(
+            agent=analyzer_agent,
+            nifi_template_content=self.xml_data
         )
 
-        # Ejecutamos el Crew, es decir, arrancamos el proceso
-        result = crew.kickoff()
-        return result
+        mapping_task = tasks.mapping_task(
+            agent=mapper_agent,
+            context=[analysis_task]
+        )
+
+        conversion_task = tasks.conversion_task(
+            agent=converter_agent,
+            context_task=mapping_task # Pasa mapping_task como context_task
+        )
+
+        reporting_task = tasks.reporting_task(
+            agent=reporter_agent,
+            context=[analysis_task, mapping_task, conversion_task] # Ahora depende también de conversion
+        )
+
+        # 4. Assemble and run the Crew (integrando el nuevo agente y tarea)
+        crew = Crew(
+            agents=[analyzer_agent, mapper_agent, converter_agent, reporter_agent], # Añadir converter_agent
+            tasks=[analysis_task, mapping_task, conversion_task, reporting_task], # Añadir conversion_task
+            process=Process.sequential,
+            verbose=True
+        )
+
+        final_report_markdown = crew.kickoff().raw
+
+        json_mapping_output = str(mapping_task.output)
+
+        return {
+            "json_mapping_str": json_mapping_output,
+            "markdown_report": final_report_markdown
+        }

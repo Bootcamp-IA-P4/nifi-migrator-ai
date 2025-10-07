@@ -2,25 +2,32 @@ import os
 from supabase import create_client
 import re
 import unicodedata
-from dotenv import load_dotenv
-import os
+from app.core.config import settings
 
-
-# Cargar .env
-load_dotenv()
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("⚠️ SUPABASE_URL o SUPABASE_KEY no están configurados")
-
-
-SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "nifi-docs")
-SUPABASE_BUCKET1 = os.getenv("SUPABASE_BUCKET1", "history")
-SUPABASE_BUCKET2 = os.getenv("SUPABASE_BUCKET2", "flow")
 # Cliente con clave anónima
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+
+
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
+
+
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
 
 
 from app.services.supabase_registry import supabase
@@ -42,7 +49,7 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
-def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str = SUPABASE_BUCKET):
+def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str):
     try:
         safe_name = sanitize_filename(file_name)
 
@@ -69,7 +76,7 @@ def insert_record(table: str, data: dict):
     result = supabase.table(table).insert(data).execute()
     return result.data
 
-def list_bucket_files(bucket: str = SUPABASE_BUCKET1):
+def list_bucket_files(bucket: str = settings.SUPABASE_BUCKET1):
     """
     Obtiene la lista de archivos (flujos) dentro de un bucket de Storage.
     Por defecto usa el bucket 'history'.
@@ -84,3 +91,12 @@ def list_bucket_files(bucket: str = SUPABASE_BUCKET1):
         traceback.print_exc()
         # Nota: El error 404 si el bucket no existe
         return {"status": "error", "detail": str(e), "bucket": bucket}
+
+# esta función nos sirve para obtener el contenido de un informe
+def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUCKET_REPORTS) -> str | None:
+    try:
+        response = supabase.storage.from_(bucket).download(report_id)
+        return response.decode('utf-8')
+    except Exception as e:
+        print(f"Error downloading report '{report_id}' from bucket '{bucket}': {e}")
+        return None

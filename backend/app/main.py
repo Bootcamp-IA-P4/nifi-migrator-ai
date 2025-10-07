@@ -5,7 +5,7 @@ from app.routes import help_routes as help
 from app.routes import validate_routes as validate
 from app.core.config import settings
 from app.routes import storage_routes as storage
-from app.routes import rag_routes as rag 
+from app.routes import audit_routes
 
 app = FastAPI(
     title="NiFi Migrator AI",
@@ -26,7 +26,8 @@ app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
 app.include_router(help.router, prefix="/api/v1", tags=["Help"])
 app.include_router(validate.router, prefix="/api/v1", tags=["Validate"])
 app.include_router(storage.router, prefix="/api/v1", tags=["Storage"])
-app.include_router(rag.router, prefix="/api/v1/rag", tags=["RAG"])
+app.include_router(audit_routes.router, prefix="/api/v1") 
+
 
 @app.get("/")
 def read_root():

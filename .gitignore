@@ -106,3 +106,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# === Generated application files ===
+backend/data/reports/
+backend/nifi-flows/nifi-templates/

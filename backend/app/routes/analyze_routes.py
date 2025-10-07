@@ -21,10 +21,11 @@ async def unified_analysis(
         raise HTTPException(status_code=400, detail="El archivo debe ser un .xml")
 
     try:
+        clean_filename = file.filename.strip()
         # PASO 1: Leer y guardar el XML original
         contents = await file.read()
         supabase_registry.upload_file_to_bucket(
-            file_name=file.filename,
+            file_name=clean_filename,
             file_bytes=contents,
             bucket=settings.SUPABASE_BUCKET1 # 'history'
         )
@@ -32,7 +33,7 @@ async def unified_analysis(
         # PASO 2: Ejecuta los agentes UNA SOLA VEZ
         report_result = await analyzer.analyze_nifi_xml_and_orchestrate(
             xml_content=contents,
-            xml_filename=file.filename
+            xml_filename=clean_filename
         )
 
         if report_result.error:
@@ -51,7 +52,7 @@ async def unified_analysis(
         if generate_pdf:
             # El usuario quiere el PDF
             pdf_bytes = pdf_generator.create_pdf_from_markdown(report_result.raw_markdown)
-            pdf_download_name = os.path.splitext(file.filename)[0] + "_migration_report.pdf"
+            pdf_download_name = os.path.splitext(clean_filename)[0] + "_migration_report.pdf"
             headers = {'Content-Disposition': f'attachment; filename="{pdf_download_name}"'}
             return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
         else:
@@ -65,7 +66,7 @@ async def unified_analysis(
 @router.get("/report/pdf/{report_id}", summary="Descarga un informe guardado como PDF")
 async def download_report_as_pdf(report_id: str):
     # Recupera un informe .md previamente guardado desde Supabase,lo convierte a PDF y lo devuelve para su descarga.
-    
+    report_id = report_id.strip()
     if not report_id.endswith('.md'):
         report_id += ".md"
 

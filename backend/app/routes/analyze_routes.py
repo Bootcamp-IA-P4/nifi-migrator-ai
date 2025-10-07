@@ -16,7 +16,6 @@ router = APIRouter()
 async def unified_analysis(
     file: UploadFile = File(...),
     generate_pdf: bool = Form(False, description="Si es true, devuelve un PDF en lugar de JSON."),
-    store_report: bool = Form(False, description="Si es true, guarda el informe .md para auditoría.")
 ):
     if not file.filename or not file.filename.endswith('.xml'):
         raise HTTPException(status_code=400, detail="El archivo debe ser un .xml")
@@ -39,15 +38,14 @@ async def unified_analysis(
         if report_result.error:
             raise HTTPException(status_code=500, detail=report_result.error)
 
-        # PASO 3: Guarda el informe .md si se solicita
-        if store_report:
-            markdown_filename = os.path.splitext(file.filename)[0] + ".md"
-            markdown_bytes = report_result.raw_markdown.encode('utf-8')
-            supabase_registry.upload_file_to_bucket(
-                file_name=markdown_filename,
-                file_bytes=markdown_bytes,
-                bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
-            )
+        # PASO 3: Guarda el informe .md sempre
+        markdown_filename = os.path.splitext(file.filename)[0] + ".md"
+        markdown_bytes = report_result.raw_markdown.encode('utf-8')
+        supabase_registry.upload_file_to_bucket(
+            file_name=markdown_filename,
+            file_bytes=markdown_bytes,
+            bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
+        )
 
         # PASO 4: Decidir qué devolver al usuariO
         if generate_pdf:
@@ -64,7 +62,35 @@ async def unified_analysis(
         print(f"[Route ERROR] Error en la ruta /analyze: {e}")
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@router.get("/report/pdf/{report_id}", summary="Descarga un informe guardado como PDF")
+async def download_report_as_pdf(report_id: str):
+    # Recupera un informe .md previamente guardado desde Supabase,lo convierte a PDF y lo devuelve para su descarga.
+    
+    if not report_id.endswith('.md'):
+        report_id += ".md"
 
+    try:
+        # 1. Descargar el archivo .md desde el bucket de informes
+        markdown_content = supabase_registry.get_report_content_by_id(
+            report_id=report_id,
+            bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
+        )
+        if not markdown_content:
+            raise HTTPException(status_code=404, detail=f"Informe '{report_id}' no encontrado.")
+        
+        # 2. Convertir el contenido a PDF
+        pdf_bytes = pdf_generator.create_pdf_from_markdown(markdown_content)
+
+        # 3. Preparar y devolver la respuesta para descarga
+        pdf_download_name = os.path.splitext(report_id)[0] + "_migration_report.pdf"
+        headers = {'Content-Disposition': f'attachment; filename="{pdf_download_name}"'}
+        return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+
+    except HTTPException as e:
+        raise e 
+    except Exception as e:
+        print(f"[Route ERROR] Error en la ruta /report/pdf/{report_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"No se pudo generar el PDF: {e}")
 
 
 # @router.post("/analyze", response_model=Report)

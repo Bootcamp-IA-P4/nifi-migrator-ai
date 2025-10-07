@@ -22,6 +22,9 @@ class Settings:
     
     # Bucket para los informes .md generados para auditoría
     SUPABASE_BUCKET_REPORTS: str = os.getenv("SUPABASE_BUCKET_REPORTS", "reports")
+
+    # Bucket flow para los PDFs de documentación técnica
+    SUPABASE_BUCKET_FLOW: str = os.getenv("SUPABASE_BUCKET_FLOW", "flow")
     
     # --- OTRAS CONFIGURACIONES ---
     # Dataset para validación del auditor

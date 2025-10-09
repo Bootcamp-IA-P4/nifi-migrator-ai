@@ -8,6 +8,39 @@ from app.core.config import settings
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
+
+
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
+
+
+from app.services.supabase_registry import supabase
+
+def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
+    response = supabase.storage.from_(bucket).download(filename)
+    if response is None:
+        raise Exception(f"No se pudo descargar {filename} de {bucket}")
+    with open(local_path, "wb") as f:
+        f.write(response)
+    return local_path
+
+
 def sanitize_filename(filename: str) -> str:
     """Normaliza nombres de archivo eliminando acentos y caracteres especiales"""
     nfkd_form = unicodedata.normalize('NFKD', filename)

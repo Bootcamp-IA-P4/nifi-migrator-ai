@@ -1,5 +1,7 @@
 from crewai import Task
 from typing import List
+
+# Prompts base
 from .prompts import (
     ANALYSIS_TASK_DESCRIPTION,
     ANALYSIS_TASK_EXPECTED_OUTPUT,
@@ -8,33 +10,34 @@ from .prompts import (
     CONVERSION_TASK_DESCRIPTION,
     CONVERSION_TASK_EXPECTED_OUTPUT,
     REPORTING_TASK_DESCRIPTION,
-    REPORTING_TASK_EXPECTED_OUTPUT
+    REPORTING_TASK_EXPECTED_OUTPUT,
 )
-from app.rag.query import get_context_for_agents
+
+# ✅ Nuevo import del RAG combinado
+from app.rag.rag_combined import get_combined_context
+
 
 class NifiMigrationTasks:
     """
-    This class defines the tasks for the NiFi migration crew.
+    Define the sequence of AI-driven tasks for NiFi 1.x → 2.x migration.
+    Now enhanced with combined RAG (templates + official PDFs from Supabase).
     """
+
     def analysis_task(self, agent, nifi_template_content: str) -> Task:
-        """Task to analyze the NiFi 1.x XML template.
-        This is the first task and receives the initial XML content.
-        """
+        """🔍 Step 1: Analyze the NiFi 1.x XML template."""
         rag_query = "Diferencias y estructura del template XML de NiFi 1.x y la migración a 2.x"
-        contexto_docs = get_context_for_agents(rag_query, k=5)
-        
-        # 1. Formatear la descripción base por separado para evitar la sintaxis incompleta.
+        contexto_docs = get_combined_context(rag_query, k=5)
+
         formatted_analysis_desc = ANALYSIS_TASK_DESCRIPTION.format(
             nifi_template_content=nifi_template_content
         )
-        
-        # 2. Concatenar la descripción formateada con el contexto RAG.
+
         task_description = (
             f"{formatted_analysis_desc}\n\n"
-            f"### Contexto de Documentación Oficial de NiFi (RAG)\n"
+            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
             f"{contexto_docs}"
         )
-        
+
         return Task(
             description=task_description,
             expected_output=ANALYSIS_TASK_EXPECTED_OUTPUT,
@@ -42,18 +45,13 @@ class NifiMigrationTasks:
         )
 
     def mapping_task(self, agent, context: List[Task]) -> Task:
-        """Task to map NiFi 1.x components to NiFi 2.x equivalents.
-        This task depends on the output of the analysis_task.
-        """
-        rag_query = "Mapeo de componentes y sus propiedades de NiFi 1.28 a NiFi 2.5.0"
-        contexto_docs = get_context_for_agents(rag_query, k=5)
+        """🧩 Step 2: Map NiFi 1.x components to NiFi 2.x equivalents."""
+        rag_query = "Mapeo de componentes y propiedades de NiFi 1.28 a NiFi 2.5.0"
+        contexto_docs = get_combined_context(rag_query, k=5)
 
-        # The description is NOT formatted with data here.
-        # CrewAI will automatically inject the output from the context tasks
-        # into the {placeholders} in the MAPPING_TASK_DESCRIPTION prompt.
         task_description = (
             f"{MAPPING_TASK_DESCRIPTION}\n\n"
-            f"### Contexto de Documentación Oficial de NiFi (RAG)\n"
+            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
             f"{contexto_docs}"
         )
 
@@ -61,11 +59,11 @@ class NifiMigrationTasks:
             description=task_description,
             expected_output=MAPPING_TASK_EXPECTED_OUTPUT,
             agent=agent,
-            context=context  # Pass the context to the Task object
+            context=context,
         )
-    
+
     def conversion_task(self, agent, context_task: Task) -> Task:
-        """Task to generate the NiFi 2.x Mermaid diagram."""
+        """⚙️ Step 3: Generate the NiFi 2.x flow in Mermaid format."""
         return Task(
             description=CONVERSION_TASK_DESCRIPTION,
             expected_output=CONVERSION_TASK_EXPECTED_OUTPUT,
@@ -74,15 +72,19 @@ class NifiMigrationTasks:
         )
 
     def reporting_task(self, agent, context: List[Task]) -> Task:
-        """Task to create a comprehensive migration report.
-        This task depends on the outputs of the analysis and mapping tasks.
-        """
-        # Similar to the mapping task, the description is not formatted here.
-        # CrewAI will inject the outputs from the context tasks into the placeholders
-        # like {nifi_1x_component_analysis} and {mapped_components_json}.
+        """📝 Step 4: Generate the full migration report."""
+        rag_query = "Buenas prácticas, patrones y anti-patrones en flujos NiFi"
+        contexto_docs = get_combined_context(rag_query, k=5)
+
+        task_description = (
+            f"{REPORTING_TASK_DESCRIPTION}\n\n"
+            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
+            f"{contexto_docs}"
+        )
+
         return Task(
-            description=REPORTING_TASK_DESCRIPTION,
+            description=task_description,
             expected_output=REPORTING_TASK_EXPECTED_OUTPUT,
             agent=agent,
-            context=context  # Pass the context to the Task object
+            context=context,
         )

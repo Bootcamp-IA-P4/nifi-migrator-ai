@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
+import { askChatbot } from '../../services/chatbot';
 
 const ChatbotWidget = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
@@ -13,7 +14,6 @@ const ChatbotWidget = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Efecto para hacer scroll automático al final
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -22,7 +22,7 @@ const ChatbotWidget = ({ isOpen, onClose }) => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -32,19 +32,19 @@ const ChatbotWidget = ({ isOpen, onClose }) => {
       sender: 'user',
     };
     setMessages((prev) => [...prev, newUserMessage]);
+    const userQuestion = input;
     setInput('');
     setIsLoading(true);
 
-    // De momento simula una respuesta del bot, luego integraremos el endpoint
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: "Gracias por tu pregunta. Estoy procesando tu solicitud sobre NiFi...",
-        sender: 'bot',
-      };
-      setMessages((prev) => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1500);
+    const response = await askChatbot(userQuestion);
+
+    const botResponse = {
+      id: messages.length + 2, 
+      text: response.answer || response.error || "Lo siento, ocurrió un error inesperado.",
+      sender: 'bot',
+    };
+    setMessages((prev) => [...prev, botResponse]);
+    setIsLoading(false);
   };
 
   return (

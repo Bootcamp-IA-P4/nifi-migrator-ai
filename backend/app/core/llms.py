@@ -25,3 +25,9 @@ llm = ChatLiteLLM(
         }
     }
 )
+
+llm_chatbot = ChatGroq(
+    temperature=0,
+    model="llama-3.3-70b-versatile",
+    api_key=settings.GROQ_API_KEY,
+)

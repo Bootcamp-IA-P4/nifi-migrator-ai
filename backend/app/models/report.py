@@ -18,3 +18,10 @@ class Report(BaseModel):
     raw_markdown: Optional[str] = None 
     error: Optional[str] = None
 
+# modelos para el chatbot:
+
+class ChatQuery(BaseModel):
+    question: str
+
+class ChatResponse(BaseModel):
+    answer: str

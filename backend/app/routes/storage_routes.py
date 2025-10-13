@@ -56,7 +56,12 @@ async def get_all_flows():
 async def upload_template(file: UploadFile, bucket: str = Form("history")):
     content = await file.read()
 
-    upload_result = upload_file_to_bucket(file.filename, content, bucket)
+    upload_result = upload_file_to_bucket(
+        file_name=file.filename, 
+        file_content=content, 
+        bucket=bucket, 
+        destination_path=file.filename
+    )
 
     if isinstance(upload_result, dict) and "error" in upload_result:
         # Manejo de error específico para subida

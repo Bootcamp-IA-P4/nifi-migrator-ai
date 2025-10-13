@@ -13,6 +13,7 @@ class Settings:
     # --- CONFIGURACIÓN DE SUPABASE ---
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
     
     # Bucket para los documentos del rag
     SUPABASE_BUCKET: str = os.getenv("SUPABASE_BUCKET", "nifi-docs")

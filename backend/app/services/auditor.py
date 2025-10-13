@@ -1,5 +1,5 @@
 from crewai import Agent, Task, Crew, Process
-from app.core.llms import llm_validator
+from app.core.llms import llm_chatbot
 import csv
 import json
 import re
@@ -27,7 +27,7 @@ def run_audit(report_content: str, dataset_path: str) -> dict:
         role=AUDITOR_AGENT_ROLE,
         goal=AUDITOR_AGENT_GOAL,
         backstory=AUDITOR_AGENT_BACKSTORY,
-        llm=llm_validator, 
+        llm=llm_chatbot, 
         verbose=True,
         allow_delegation=False
     )

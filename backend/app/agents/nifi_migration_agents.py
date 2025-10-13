@@ -1,5 +1,6 @@
 from crewai import Agent
-from app.core.llms import llm
+# from app.core.llms import llm
+from app.core.llms import llm_chatbot
 from .prompts import (
     ANALYZER_AGENT_ROLE,
     ANALYZER_AGENT_GOAL,
@@ -28,7 +29,7 @@ class NifiMigrationAgents:
             goal=ANALYZER_AGENT_GOAL,
             backstory=ANALYZER_AGENT_BACKSTORY,
             verbose=True,
-            llm=llm,
+            llm=llm_chatbot,
         )
 
     def migration_mapper(self) -> Agent:
@@ -38,7 +39,7 @@ class NifiMigrationAgents:
             goal=MAPPER_AGENT_GOAL,
             backstory=MAPPER_AGENT_BACKSTORY,
             verbose=True,
-            llm=llm,
+            llm=llm_chatbot,
         )
     
     def flow_converter(self) -> Agent:
@@ -48,7 +49,7 @@ class NifiMigrationAgents:
             goal=CONVERTER_AGENT_GOAL,
             backstory=CONVERTER_AGENT_BACKSTORY,
             verbose=True,
-            llm=llm,
+            llm=llm_chatbot,
         )
 
     def report_generator(self) -> Agent:
@@ -58,5 +59,5 @@ class NifiMigrationAgents:
             goal=REPORTER_AGENT_GOAL,
             backstory=REPORTER_AGENT_BACKSTORY,
             verbose=True,
-            llm=llm,
+            llm=llm_chatbot,
         )

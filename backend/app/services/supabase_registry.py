@@ -4,8 +4,8 @@ import re
 import unicodedata
 from app.core.config import settings
 
-# Cliente con clave anónima
-supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+# Cliente con clave de servicio para operaciones de escritura
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 
 def sanitize_filename(filename: str) -> str:

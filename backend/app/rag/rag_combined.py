@@ -13,8 +13,8 @@ from app.rag.query import get_context_for_agents  # Tu RAG original basado en em
 from app.services.supabase_registry import supabase  # Cliente Supabase ya configurado
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 
 
 # ==========================================================

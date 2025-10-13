@@ -31,6 +31,7 @@ class Settings:
     DATASET_PATH: str = os.getenv("DATASET_PATH", "data/migration_plan.csv")
     # Origins para CORS
     ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",")
+    REPORTS_DIR: str = "data/reports"
 
 
 settings = Settings()

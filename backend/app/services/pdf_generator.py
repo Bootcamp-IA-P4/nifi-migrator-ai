@@ -1,16 +1,68 @@
-import markdown2
+import os
 from weasyprint import HTML
+import markdown
 
-def create_pdf_from_markdown(markdown_content: str) -> bytes:
-    # 1. Convertir el Markdown a HTML.
-    # El extra "fenced-code-blocks" es importante para que los bloques de código (como Mermaid) se vean bien.
-    html_content = markdown2.markdown(
-        markdown_content, 
-        extras=["fenced-code-blocks", "tables", "cuddled-lists"]
-    )
+def generate_pdf_from_markdown(markdown_path: str, output_path: str):
+    """Convierte un archivo Markdown a PDF usando WeasyPrint."""
+    if not os.path.exists(markdown_path):
+        raise FileNotFoundError(f"No se encontró el archivo Markdown: {markdown_path}")
 
-    # 2. Convertir el HTML a PDF usando WeasyPrint.
-    # La función write_pdf() devuelve los bytes del PDF.
-    pdf_bytes = HTML(string=html_content).write_pdf()
+    # Leer el contenido del markdown
+    with open(markdown_path, "r", encoding="utf-8") as f:
+        markdown_content = f.read()
 
-    return pdf_bytes
+    # Convertir Markdown a HTML con formato
+    html_content = markdown.markdown(markdown_content, extensions=["fenced_code", "tables"])
+
+    # Plantilla HTML más elegante
+    html_template = f"""
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{
+                font-family: 'Arial', sans-serif;
+                margin: 40px;
+                line-height: 1.6;
+                color: #333;
+            }}
+            h1, h2, h3 {{
+                color: #004aad;
+            }}
+            pre {{
+                background: #f4f4f4;
+                padding: 10px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-size: 12px;
+            }}
+            code {{
+                background: #eee;
+                padding: 2px 4px;
+                border-radius: 4px;
+            }}
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+                margin-top: 20px;
+            }}
+            th, td {{
+                border: 1px solid #ccc;
+                padding: 8px;
+                text-align: left;
+            }}
+            th {{
+                background-color: #f2f2f2;
+            }}
+        </style>
+    </head>
+    <body>
+        {html_content}
+    </body>
+    </html>
+    """
+
+    # Crear el PDF
+    HTML(string=html_template).write_pdf(output_path)
+    print(f"✅ PDF generado: {output_path}")
+    return output_path

@@ -8,39 +8,6 @@ from app.core.config import settings
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
-from app.services.supabase_registry import supabase
-
-def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
-    response = supabase.storage.from_(bucket).download(filename)
-    if response is None:
-        raise Exception(f"No se pudo descargar {filename} de {bucket}")
-    with open(local_path, "wb") as f:
-        f.write(response)
-    return local_path
-
-
-from app.services.supabase_registry import supabase
-
-def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
-    response = supabase.storage.from_(bucket).download(filename)
-    if response is None:
-        raise Exception(f"No se pudo descargar {filename} de {bucket}")
-    with open(local_path, "wb") as f:
-        f.write(response)
-    return local_path
-
-
-from app.services.supabase_registry import supabase
-
-def download_pdf_from_bucket(bucket: str, filename: str, local_path: str):
-    response = supabase.storage.from_(bucket).download(filename)
-    if response is None:
-        raise Exception(f"No se pudo descargar {filename} de {bucket}")
-    with open(local_path, "wb") as f:
-        f.write(response)
-    return local_path
-
-
 def sanitize_filename(filename: str) -> str:
     """Normaliza nombres de archivo eliminando acentos y caracteres especiales"""
     nfkd_form = unicodedata.normalize('NFKD', filename)
@@ -49,22 +16,33 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
-def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str):
+def upload_file_to_bucket(file_path: str, bucket: str, destination_path: str):
     try:
-        safe_name = sanitize_filename(file_name)
+        content_type = "application/octet-stream" # Tipo por defecto
+        if destination_path.endswith(".xml"):
+            content_type = "application/xml"
+        elif destination_path.endswith(".md"):
+            content_type = "text/markdown"
 
-        result = supabase.storage.from_(bucket).upload(
-            safe_name,
-            file_bytes,
-            file_options={
-                "content-type": "application/octet-stream",
-                "upsert": "true"
-            }
-        )
-        return {"status": "ok", "bucket": bucket, "path": safe_name, "bucket_result": result}
+        print(f"[Supabase] Subiendo '{file_path}' a '{bucket}/{destination_path}' con tipo '{content_type}'...")
+        
+        with open(file_path, 'rb') as f:
+            result = supabase.storage.from_(bucket).upload(
+                path=destination_path,
+                file=f,
+                file_options={
+                    "content-type": content_type,
+                    "upsert": "true" 
+                }
+            )
+        print(f"[Supabase] Subida completada para '{destination_path}'.")
+        return {"status": "ok", "bucket": bucket, "path": destination_path, "result": result}
+
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        if "security policy" in str(e):
+             print("[Supabase FATAL] La API Key no tiene permisos para escribir. Revisa las políticas de RLS o usa la service_role key.")
+        
+        print(f"[Supabase ERROR] Excepción durante la subida: {e}")
         return {"status": "error", "bucket": bucket, "detail": str(e)}
 
 
@@ -72,7 +50,6 @@ def insert_record(table: str, data: dict):
     """
     Inserta un registro en la base de datos Supabase.
     """
-    # Esta función queda, aunque no la uses ahora, por si añades una tabla más tarde.
     result = supabase.table(table).insert(data).execute()
     return result.data
 
@@ -82,14 +59,11 @@ def list_bucket_files(bucket: str = settings.SUPABASE_BUCKET1):
     Por defecto usa el bucket 'history'.
     """
     try:
-        # Usamos list() para obtener los archivos. 'path' vacío lista la raíz del bucket.
         result = supabase.storage.from_(bucket).list(path="", options={"limit": 100})
-        # El resultado es directamente una lista de archivos/objetos.
         return {"status": "ok", "data": result, "bucket": bucket}
     except Exception as e:
         import traceback
         traceback.print_exc()
-        # Nota: El error 404 si el bucket no existe
         return {"status": "error", "detail": str(e), "bucket": bucket}
 
 # esta función nos sirve para obtener el contenido de un informe

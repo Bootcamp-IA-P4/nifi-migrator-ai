@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scroll minimalista tipo ChatGPT */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 255, 0.35); /* azul indigo suave */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 255, 0.55);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 /* 
 

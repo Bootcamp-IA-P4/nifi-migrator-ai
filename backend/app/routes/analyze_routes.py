@@ -4,6 +4,7 @@ from app.services import analyzer, pdf_generator, supabase_registry
 from app.models.report import Report
 from app.core.config import settings
 import os
+import tempfile
 
 router = APIRouter()
 #    Este endpoint unificado maneja todos los casos de uso, esta explicación luego la borraremos: 
@@ -21,37 +22,47 @@ async def unified_analysis(
         raise HTTPException(status_code=400, detail="El archivo debe ser un .xml")
 
     try:
+        clean_filename = file.filename.strip()
+        safe_filename = supabase_registry.sanitize_filename(clean_filename)
         # PASO 1: Leer y guardar el XML original
         contents = await file.read()
-        supabase_registry.upload_file_to_bucket(
-            file_name=file.filename,
-            file_bytes=contents,
-            bucket=settings.SUPABASE_BUCKET1 # 'history'
-        )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xml", mode='wb') as temp_xml:
+            temp_xml.write(contents)
+            temp_xml_path = temp_xml.name
 
+        supabase_registry.upload_file_to_bucket(
+            file_path=temp_xml_path,
+            bucket=settings.SUPABASE_BUCKET1, # 'history'
+            destination_path=safe_filename
+        )
+        os.remove(temp_xml_path) 
         # PASO 2: Ejecuta los agentes UNA SOLA VEZ
         report_result = await analyzer.analyze_nifi_xml_and_orchestrate(
             xml_content=contents,
-            xml_filename=file.filename
+            xml_filename=safe_filename
         )
 
         if report_result.error:
             raise HTTPException(status_code=500, detail=report_result.error)
 
         # PASO 3: Guarda el informe .md sempre
-        markdown_filename = os.path.splitext(file.filename)[0] + ".md"
-        markdown_bytes = report_result.raw_markdown.encode('utf-8')
-        supabase_registry.upload_file_to_bucket(
-            file_name=markdown_filename,
-            file_bytes=markdown_bytes,
-            bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
-        )
+        sanitized_name = os.path.splitext(safe_filename.replace(" ", "_"))[0]
+        report_filename_on_disk = f"report-{sanitized_name}.md"
+        local_report_path = os.path.join(settings.REPORTS_DIR, report_filename_on_disk)
+
+        # Verificamos que el archivo exista y lo subimos usando su ruta
+        if os.path.exists(local_report_path):
+            supabase_registry.upload_file_to_bucket(
+                file_path=local_report_path,
+                bucket=settings.SUPABASE_BUCKET_REPORTS, # 'reports'
+                destination_path=report_filename_on_disk
+            )
 
         # PASO 4: Decidir qué devolver al usuariO
         if generate_pdf:
             # El usuario quiere el PDF
             pdf_bytes = pdf_generator.create_pdf_from_markdown(report_result.raw_markdown)
-            pdf_download_name = os.path.splitext(file.filename)[0] + "_migration_report.pdf"
+            pdf_download_name = os.path.splitext(clean_filename)[0] + "_migration_report.pdf"
             headers = {'Content-Disposition': f'attachment; filename="{pdf_download_name}"'}
             return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
         else:
@@ -65,7 +76,7 @@ async def unified_analysis(
 @router.get("/report/pdf/{report_id}", summary="Descarga un informe guardado como PDF")
 async def download_report_as_pdf(report_id: str):
     # Recupera un informe .md previamente guardado desde Supabase,lo convierte a PDF y lo devuelve para su descarga.
-    
+    report_id = report_id.strip()
     if not report_id.endswith('.md'):
         report_id += ".md"
 

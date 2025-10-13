@@ -5,6 +5,7 @@ import Upload from "./pages/Upload";
 import About from "./pages/About";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Chatbot from "./components/chatbot/Chatbot";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <Chatbot />
     </BrowserRouter>
   );
 }

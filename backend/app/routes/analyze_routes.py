@@ -26,16 +26,13 @@ async def unified_analysis(
         safe_filename = supabase_registry.sanitize_filename(clean_filename)
         # PASO 1: Leer y guardar el XML original
         contents = await file.read()
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xml", mode='wb') as temp_xml:
-            temp_xml.write(contents)
-            temp_xml_path = temp_xml.name
 
         supabase_registry.upload_file_to_bucket(
-            file_path=temp_xml_path,
+            file_name=safe_filename,
+            file_content=contents,
             bucket=settings.SUPABASE_BUCKET1, # 'history'
             destination_path=safe_filename
         )
-        os.remove(temp_xml_path) 
         # PASO 2: Ejecuta los agentes UNA SOLA VEZ
         report_result = await analyzer.analyze_nifi_xml_and_orchestrate(
             xml_content=contents,
@@ -50,10 +47,14 @@ async def unified_analysis(
         report_filename_on_disk = f"report-{sanitized_name}.md"
         local_report_path = os.path.join(settings.REPORTS_DIR, report_filename_on_disk)
 
-        # Verificamos que el archivo exista y lo subimos usando su ruta
+        # Verificamos que el archivo exista y lo subimos usando su contenido
         if os.path.exists(local_report_path):
+            with open(local_report_path, 'rb') as f:
+                report_content = f.read()
+            
             supabase_registry.upload_file_to_bucket(
-                file_path=local_report_path,
+                file_name=report_filename_on_disk,
+                file_content=report_content,
                 bucket=settings.SUPABASE_BUCKET_REPORTS, # 'reports'
                 destination_path=report_filename_on_disk
             )

@@ -16,25 +16,24 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
-def upload_file_to_bucket(file_path: str, bucket: str, destination_path: str):
+def upload_file_to_bucket(file_name: str, file_content: bytes, bucket: str, destination_path: str):
     try:
-        content_type = "application/octet-stream" # Tipo por defecto
+        content_type = "application/octet-stream"  # Tipo por defecto
         if destination_path.endswith(".xml"):
             content_type = "application/xml"
         elif destination_path.endswith(".md"):
             content_type = "text/markdown"
 
-        print(f"[Supabase] Subiendo '{file_path}' a '{bucket}/{destination_path}' con tipo '{content_type}'...")
-        
-        with open(file_path, 'rb') as f:
-            result = supabase.storage.from_(bucket).upload(
-                path=destination_path,
-                file=f,
-                file_options={
-                    "content-type": content_type,
-                    "upsert": "true" 
-                }
-            )
+        print(f"[Supabase] Subiendo '{file_name}' a '{bucket}/{destination_path}' con tipo '{content_type}'...")
+
+        result = supabase.storage.from_(bucket).upload(
+            path=destination_path,
+            file=file_content,
+            file_options={
+                "content-type": content_type,
+                "upsert": "true"
+            }
+        )
         print(f"[Supabase] Subida completada para '{destination_path}'.")
         return {"status": "ok", "bucket": bucket, "path": destination_path, "result": result}
 

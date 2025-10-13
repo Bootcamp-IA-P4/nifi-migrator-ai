@@ -13,7 +13,7 @@ llm_validator = ChatOpenAI(
 
 
 llm = ChatLiteLLM(
-    model="openrouter/deepseek/deepseek-chat-v3.1:free",
+    model="openrouter/deepseek/deepseek-chat-v3.1:free",   # este es el de pago, solo se cambiaría , pero usar solamente cuando sea necesario: "anthropic/claude-sonnet-4-20250514"
     temperature=0.1,
     max_output_tokens=8192,
     litellm_params={

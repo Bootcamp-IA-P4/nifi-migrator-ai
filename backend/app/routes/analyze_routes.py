@@ -1,9 +1,10 @@
-# Endpoints para anÃ¡lisis de XML
+# Endpoints para análisis de XML
 from fastapi import APIRouter, UploadFile, Response, Form, HTTPException, File
 from app.services import analyzer, pdf_generator, supabase_registry
 from app.models.report import Report
 from app.core.config import settings
 import os
+import io
 import tempfile
 
 router = APIRouter()
@@ -26,16 +27,11 @@ async def unified_analysis(
         safe_filename = supabase_registry.sanitize_filename(clean_filename)
         # PASO 1: Leer y guardar el XML original
         contents = await file.read()
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xml", mode='wb') as temp_xml:
-            temp_xml.write(contents)
-            temp_xml_path = temp_xml.name
-
         supabase_registry.upload_file_to_bucket(
-            file_path=temp_xml_path,
-            bucket=settings.SUPABASE_BUCKET1, # 'history'
-            destination_path=safe_filename
+            file_name=safe_filename,
+            file_bytes=contents,
+            bucket=settings.SUPABASE_BUCKET1
         )
-        os.remove(temp_xml_path) 
         # PASO 2: Ejecuta los agentes UNA SOLA VEZ
         report_result = await analyzer.analyze_nifi_xml_and_orchestrate(
             xml_content=contents,
@@ -46,16 +42,14 @@ async def unified_analysis(
             raise HTTPException(status_code=500, detail=report_result.error)
 
         # PASO 3: Guarda el informe .md sempre
-        sanitized_name = os.path.splitext(safe_filename.replace(" ", "_"))[0]
-        report_filename_on_disk = f"report-{sanitized_name}.md"
-        local_report_path = os.path.join(settings.REPORTS_DIR, report_filename_on_disk)
-
         # Verificamos que el archivo exista y lo subimos usando su ruta
-        if os.path.exists(local_report_path):
+        if report_result.raw_markdown:
+            report_filename_supabase = os.path.splitext(safe_filename)[0] + ".md"
+            markdown_bytes = report_result.raw_markdown.encode('utf-8')
             supabase_registry.upload_file_to_bucket(
-                file_path=local_report_path,
-                bucket=settings.SUPABASE_BUCKET_REPORTS, # 'reports'
-                destination_path=report_filename_on_disk
+                file_name=report_filename_supabase,
+                file_bytes=markdown_bytes,
+                bucket=settings.SUPABASE_BUCKET_REPORTS
             )
 
         # PASO 4: Decidir qué devolver al usuariO

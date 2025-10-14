@@ -1,10 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import { FileText, CheckCircle, AlertTriangle, Database } from "lucide-react";
 import MermaidChart from "./MermaidChart";
+import { Download } from "lucide-react";
+import { downloadPdfByReportId } from "../services/api"; 
 import { sanitizeMermaid } from "../utils/MermaidSanitizer";
 
 const ReportView = ({ report }) => {
-  if (!report) return null;
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    // El backend usa el nombre del archivo .md como ID.
+    // Asumimos que el objeto 'report' tiene esta información.
+    const reportId = report?.report_filename; 
+
+    if (!reportId) {
+      console.error("No se encontró un ID de informe para descargar el PDF.");
+      alert("Error: No se puede descargar el PDF porque falta el ID del informe.");
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    try {
+      // Llamamos a la función de la API que creamos
+      await downloadPdfByReportId(reportId);
+    } catch (error) {
+      console.error("Fallo al descargar el PDF", error);
+      alert(`Error al generar el PDF: ${error.message}`);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+  const handleDownloadJson = () => {
+    if (!report) return;
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(report, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    const jsonFileName = report.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + "_report.json";
+    link.download = jsonFileName;
+    link.click();
+  };
+
+  if (!report) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
+        <FileText className="w-16 h-16 text-gray-300 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-700">Esperando análisis</h3>
+        <p className="text-gray-500 mt-2">
+          Sube un archivo XML para ver el informe de migración aquí.
+        </p>
+      </div>
+    );
+  }
 
   // --- Helpers seguros ---
   const safeArray = (val) => (Array.isArray(val) ? val : []);
@@ -96,9 +144,28 @@ const ReportView = ({ report }) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <FileText className="text-indigo-600 w-6 h-6" />
-        <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <FileText className="text-indigo-600 w-6 h-6" />
+          <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isDownloadingPdf}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            <Download size={16} />
+            {isDownloadingPdf ? "Generando..." : "Descargar PDF"}
+          </button>
+          <button
+            onClick={handleDownloadJson}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-100 rounded-lg hover:bg-indigo-200 transition-colors"
+          >
+            <Download size={16} />
+            Descargar JSON
+          </button>
+        </div>
       </div>
 
       {resumen &&

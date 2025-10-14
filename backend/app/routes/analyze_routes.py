@@ -51,7 +51,7 @@ async def unified_analysis(
                 file_bytes=markdown_bytes,
                 bucket=settings.SUPABASE_BUCKET_REPORTS
             )
-
+            report_result.report_filename = report_filename_supabase
         # PASO 4: Decidir qué devolver al usuariO
         if generate_pdf:
             # El usuario quiere el PDF

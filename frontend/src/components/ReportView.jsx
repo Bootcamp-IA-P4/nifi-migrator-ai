@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { FileText, CheckCircle, AlertTriangle, Database } from "lucide-react";
 import MermaidChart from "./MermaidChart";
 import { sanitizeMermaid } from "../utils/MermaidSanitizer";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import UploadForm from "../components/UploadForm";
 import ReportView from "../components/ReportView";
 import mockReport from "../data/mockReport";
-import { analyzeFlow, downloadPdfByReportId } from "../services/api";
+import { downloadPdfByReportId } from "../services/api";
 
 const Upload = () => {
   const [report, setReport] = useState(mockReport);

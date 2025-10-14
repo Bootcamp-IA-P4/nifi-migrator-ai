@@ -1,7 +1,7 @@
 // // src/components/UploadForm.jsx
 import React, { useState, useCallback } from "react";
 import { analyzeFlow } from "../services/api";
-import { Upload, FileText } from "lucide-react"; 
+import { Upload } from "lucide-react"; 
 
 function UploadForm({ onReport, onFileSelect }) {
   const [file, setFile] = useState(null);
@@ -9,7 +9,6 @@ function UploadForm({ onReport, onFileSelect }) {
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [message, setMessage] = useState("");
-  const [generatePdf, setGeneratePdf] = useState(false);
   
   const handleFileChange = useCallback((selectedFile) => {
     if (selectedFile) {

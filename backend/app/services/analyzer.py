@@ -11,10 +11,6 @@ async def analyze_nifi_xml_and_orchestrate(
     xml_content: bytes,
     xml_filename: str
 ) -> Report:
-    """
-    Función principal de servicio que invoca al orquestador, enriquece
-    los resultados y devuelve el objeto Report final para la API.
-    """
     print(f"[Service] Iniciando análisis para el archivo {xml_filename}...")
 
     try:

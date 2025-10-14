@@ -1,9 +1,11 @@
-# Endpoints para anÃ¡lisis de XML
+# Endpoints para análisis de XML
 from fastapi import APIRouter, UploadFile, Response, Form, HTTPException, File
 from app.services import analyzer, pdf_generator, supabase_registry
 from app.models.report import Report
 from app.core.config import settings
 import os
+import io
+import tempfile
 
 router = APIRouter()
 #    Este endpoint unificado maneja todos los casos de uso, esta explicación luego la borraremos: 
@@ -22,31 +24,33 @@ async def unified_analysis(
 
     try:
         clean_filename = file.filename.strip()
+        safe_filename = supabase_registry.sanitize_filename(clean_filename)
         # PASO 1: Leer y guardar el XML original
         contents = await file.read()
         supabase_registry.upload_file_to_bucket(
-            file_name=clean_filename,
+            file_name=safe_filename,
             file_bytes=contents,
-            bucket=settings.SUPABASE_BUCKET1 # 'history'
+            bucket=settings.SUPABASE_BUCKET1
         )
-
         # PASO 2: Ejecuta los agentes UNA SOLA VEZ
         report_result = await analyzer.analyze_nifi_xml_and_orchestrate(
             xml_content=contents,
-            xml_filename=clean_filename
+            xml_filename=safe_filename
         )
 
         if report_result.error:
             raise HTTPException(status_code=500, detail=report_result.error)
 
         # PASO 3: Guarda el informe .md sempre
-        markdown_filename = os.path.splitext(file.filename)[0] + ".md"
-        markdown_bytes = report_result.raw_markdown.encode('utf-8')
-        supabase_registry.upload_file_to_bucket(
-            file_name=markdown_filename,
-            file_bytes=markdown_bytes,
-            bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
-        )
+        # Verificamos que el archivo exista y lo subimos usando su ruta
+        if report_result.raw_markdown:
+            report_filename_supabase = os.path.splitext(safe_filename)[0] + ".md"
+            markdown_bytes = report_result.raw_markdown.encode('utf-8')
+            supabase_registry.upload_file_to_bucket(
+                file_name=report_filename_supabase,
+                file_bytes=markdown_bytes,
+                bucket=settings.SUPABASE_BUCKET_REPORTS
+            )
 
         # PASO 4: Decidir qué devolver al usuariO
         if generate_pdf:

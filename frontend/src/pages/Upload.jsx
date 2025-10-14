@@ -217,9 +217,20 @@ import React, { useState } from "react";
 import UploadForm from "../components/UploadForm";
 import ReportView from "../components/ReportView";
 import mockReport from "../data/mockReport";
+import { analyzeFlow, uploadTemplate } from "../services/api";
 
 const Upload = () => {
   const [report, setReport] = useState(mockReport);
+  const [selectedFile, setSelectedFile] = useState(null); 
+  
+  const handleNewReport = (newReport) => {
+    setReport(newReport);
+  };
+
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+  };
+
 
   const handleDownload = () => {
     if (!report) return;
@@ -328,7 +339,7 @@ const Upload = () => {
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 text-center max-w-sm">
                 Tamaño máximo permitido: <strong>5 MB</strong>
               </p>
-              <UploadForm onReport={setReport} />
+              <UploadForm onReport={handleNewReport} onFileSelect={handleFileSelect} />
             </div>
 
             {/* Instrucciones */}

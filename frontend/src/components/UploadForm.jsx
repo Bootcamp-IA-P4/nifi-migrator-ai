@@ -1,14 +1,23 @@
 // // src/components/UploadForm.jsx
 import React, { useState, useCallback } from "react";
-import axios from "axios";
-import { Upload } from "lucide-react";
+import { analyzeFlow } from "../services/api";
+import { Upload, FileText } from "lucide-react"; 
 
-function UploadForm({ onReport }) {
+function UploadForm({ onReport, onFileSelect }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [message, setMessage] = useState("");
+  const [generatePdf, setGeneratePdf] = useState(false);
+  
+  const handleFileChange = useCallback((selectedFile) => {
+    if (selectedFile) {
+      setFile(selectedFile);
+      onFileSelect(selectedFile); 
+      setError(null);
+    }
+  }, [onFileSelect]);
 
   // 🔹 Drag events
   const handleDrag = useCallback((e) => {
@@ -26,55 +35,30 @@ function UploadForm({ onReport }) {
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-      setError(null);
+      handleFileChange(e.dataTransfer.files[0]); 
     }
-  }, []);
+  }, [handleFileChange]); 
 
-  // 🔹 Upload + Analyze + Save
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!file) {
-      setError("⚠️ Please select or drag a file before uploading.");
+      setError("⚠️ Por favor, selecciona un archivo.");
       return;
     }
 
-    setError(null);
     setLoading(true);
-    setMessage("🔍 Analyzing file...");
+    setError(null);
+    setMessage("🔍 Analizando flujo... Esto puede tardar unos minutos.");
 
     try {
-      // 1️⃣ ANALYZE FLOW
-      const analyzeData = new FormData();
-      analyzeData.append("file", file);
-
-      const analyzeResponse = await axios.post(
-        "http://127.0.0.1:8000/api/v1/analyze",
-        analyzeData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      const reportData = analyzeResponse.data;
-      onReport(reportData);
-      setMessage("✅ Analysis complete. Saving report...");
-
-      // 2️⃣ UPLOAD TEMPLATE (SAVE REPORT)
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-      uploadData.append("bucket", "history"); // puedes cambiar el bucket si es necesario
-
-      const uploadResponse = await axios.post(
-        "http://127.0.0.1:8000/api/v1/upload_template",
-        uploadData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      console.log("🗂️ Upload response:", uploadResponse.data);
-      setMessage("💾 Report successfully saved to history.");
+      const reportData = await analyzeFlow(file, false); 
+      
+      onReport(reportData); 
+      setMessage("✅ Análisis completado con éxito.");
     } catch (err) {
-      console.error(err);
-      setError("❌ Could not connect to backend or upload failed.");
+      setError(`❌ Error en el análisis: ${err.message}`);
+      onReport(null);
       setMessage("");
     } finally {
       setLoading(false);
@@ -106,7 +90,7 @@ function UploadForm({ onReport }) {
         <input
           type="file"
           accept=".xml"
-          onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => handleFileChange(e.target.files[0])}
           className="hidden"
         />
       </label>

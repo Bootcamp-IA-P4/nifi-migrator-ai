@@ -1,4 +1,5 @@
 import os
+import io
 from supabase import create_client
 import re
 import unicodedata
@@ -16,34 +17,28 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
-def upload_file_to_bucket(file_name: str, file_content: bytes, bucket: str, destination_path: str):
+def upload_file_to_bucket(file_name: str, file_bytes: bytes, bucket: str):
     try:
-        content_type = "application/octet-stream"  # Tipo por defecto
+        destination_path = file_name 
+        content_type = "application/octet-stream"
         if destination_path.endswith(".xml"):
             content_type = "application/xml"
         elif destination_path.endswith(".md"):
             content_type = "text/markdown"
 
-        print(f"[Supabase] Subiendo '{file_name}' a '{bucket}/{destination_path}' con tipo '{content_type}'...")
-
-        result = supabase.storage.from_(bucket).upload(
+        print(f"[Supabase] Subiendo '{destination_path}' desde memoria al bucket '{bucket}'...")
+        
+        
+        supabase.storage.from_(bucket).upload(
             path=destination_path,
-            file=file_content,
-            file_options={
-                "content-type": content_type,
-                "upsert": "true"
-            }
+            file=file_bytes,
+            file_options={"content-type": content_type, "upsert": "true"}
         )
         print(f"[Supabase] Subida completada para '{destination_path}'.")
-        return {"status": "ok", "bucket": bucket, "path": destination_path, "result": result}
-
+        return {"status": "ok", "path": destination_path}
     except Exception as e:
-        if "security policy" in str(e):
-             print("[Supabase FATAL] La API Key no tiene permisos para escribir. Revisa las políticas de RLS o usa la service_role key.")
-        
-        print(f"[Supabase ERROR] Excepción durante la subida: {e}")
-        return {"status": "error", "bucket": bucket, "detail": str(e)}
-
+        print(f"[Supabase ERROR] {e}")
+        raise e
 
 def insert_record(table: str, data: dict):
     """

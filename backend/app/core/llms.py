@@ -11,14 +11,22 @@ from langchain_litellm import ChatLiteLLM
 # )
 
 
-# llm = ChatLiteLLM(
-#     model="openrouter/deepseek/deepseek-chat",
-#     temperature=0.1,
-#     max_tokens=8192,
-# )
+llm = ChatLiteLLM(
+    model="openrouter/mistralai/mistral-7b-instruct:free",   # este es el de pago, solo se cambiaría , pero usar solamente cuando sea necesario: "anthropic/claude-sonnet-4-20250514"
+    temperature=0.1,
+    max_output_tokens=8192,
+    litellm_params={
+        "metadata": {
+            "headers": {
+                "HTTP-Referer": "https://nifi-migrator-ai.factoriaf5.com",
+                "X-Title": "NiFi Migrator AI"
+            }
+        }
+    }
+)
 
-llm_chatbot = ChatLiteLLM(
-    model="groq/llama-3.3-70b-versatile",
+
+llm_chatbot = ChatGroq(
     temperature=0,
     api_key=settings.GROQ_API_KEY,
 )

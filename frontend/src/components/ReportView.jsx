@@ -9,8 +9,6 @@ const ReportView = ({ report }) => {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    // El backend usa el nombre del archivo .md como ID.
-    // Asumimos que el objeto 'report' tiene esta información.
     const reportId = report?.report_filename; 
 
     if (!reportId) {
@@ -21,7 +19,6 @@ const ReportView = ({ report }) => {
 
     setIsDownloadingPdf(true);
     try {
-      // Llamamos a la función de la API que creamos
       await downloadPdfByReportId(reportId);
     } catch (error) {
       console.error("Fallo al descargar el PDF", error);
@@ -29,17 +26,6 @@ const ReportView = ({ report }) => {
     } finally {
       setIsDownloadingPdf(false);
     }
-  };
-  const handleDownloadJson = () => {
-    if (!report) return;
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(report, null, 2)
-    )}`;
-    const link = document.createElement("a");
-    link.href = jsonString;
-    const jsonFileName = report.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + "_report.json";
-    link.download = jsonFileName;
-    link.click();
   };
 
   if (!report) {
@@ -81,16 +67,12 @@ const ReportView = ({ report }) => {
       {items.map((item, idx) => {
         let content = "";
         if (typeof item === "object" && item !== null) {
-          // --- INICIO DE LA MODIFICACIÓN ---
-          // Adaptado para reconocer los campos del nuevo backend (nifi1_name)
-          // y mostrar un resumen simple en una sola línea, manteniendo el estilo.
           if (item.nifi1_name && item.nifi1_type) {
             const friendlyStatus = statusTranslations[item.status] || item.status;
             content = `${item.nifi1_name} | Tipo: ${item.nifi1_type} | Estado: ${friendlyStatus}`;
           } else {
             content = JSON.stringify(item);
           }
-          // --- FIN DE LA MODIFICACIÓN ---
         } else {
           content = String(item);
         }
@@ -157,13 +139,6 @@ const ReportView = ({ report }) => {
           >
             <Download size={16} />
             {isDownloadingPdf ? "Generando..." : "Descargar PDF"}
-          </button>
-          <button
-            onClick={handleDownloadJson}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-100 rounded-lg hover:bg-indigo-200 transition-colors"
-          >
-            <Download size={16} />
-            Descargar JSON
           </button>
         </div>
       </div>

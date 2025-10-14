@@ -1,32 +1,9 @@
 import React, { useState } from "react";
 import { FileText, CheckCircle, AlertTriangle, Database } from "lucide-react";
 import MermaidChart from "./MermaidChart";
-import { Download } from "lucide-react";
-import { downloadPdfByReportId } from "../services/api"; 
 import { sanitizeMermaid } from "../utils/MermaidSanitizer";
 
 const ReportView = ({ report }) => {
-  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-
-  const handleDownloadPdf = async () => {
-    const reportId = report?.report_filename; 
-
-    if (!reportId) {
-      console.error("No se encontró un ID de informe para descargar el PDF.");
-      alert("Error: No se puede descargar el PDF porque falta el ID del informe.");
-      return;
-    }
-
-    setIsDownloadingPdf(true);
-    try {
-      await downloadPdfByReportId(reportId);
-    } catch (error) {
-      console.error("Fallo al descargar el PDF", error);
-      alert(`Error al generar el PDF: ${error.message}`);
-    } finally {
-      setIsDownloadingPdf(false);
-    }
-  };
 
   if (!report) {
     return (
@@ -130,16 +107,6 @@ const ReportView = ({ report }) => {
         <div className="flex items-center gap-2">
           <FileText className="text-indigo-600 w-6 h-6" />
           <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleDownloadPdf}
-            disabled={isDownloadingPdf}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            <Download size={16} />
-            {isDownloadingPdf ? "Generando..." : "Descargar PDF"}
-          </button>
         </div>
       </div>
 

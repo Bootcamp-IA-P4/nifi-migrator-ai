@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import UploadForm from "../components/UploadForm";
 import ReportView from "../components/ReportView";
 import mockReport from "../data/mockReport";
-import { analyzeFlow, uploadTemplate } from "../services/api";
+import { analyzeFlow, downloadPdfByReportId } from "../services/api";
 
 const Upload = () => {
   const [report, setReport] = useState(mockReport);
-  const [selectedFile, setSelectedFile] = useState(null); 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false); 
   
   const handleNewReport = (newReport) => {
     setReport(newReport);
@@ -29,6 +30,21 @@ const Upload = () => {
     element.click();
   };
 
+  const handleDownloadPdf = async () => {
+    const reportId = report?.report_filename;
+    if (!reportId) {
+      alert("Error: No se puede descargar el PDF porque falta el ID del informe.");
+      return;
+    }
+    setIsDownloadingPdf(true);
+    try {
+      await downloadPdfByReportId(reportId);
+    } catch (error) {
+      alert(`Error al generar el PDF: ${error.message}`);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#0f172a] overflow-hidden font-inter transition-colors duration-500">
       {/* 🌌 HERO / BANNER FIJO CON COLORES OSCUROS */}
@@ -175,7 +191,29 @@ const Upload = () => {
                 </svg>
                 <span>Actualizar Informe</span>
               </button>
-
+              {report && (
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf || !report.report_filename}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#2663EB] dark:text-[#6CA8FF] bg-white dark:bg-[#1e293b] border border-blue-200 dark:border-blue-700 rounded-lg shadow-sm hover:shadow-md hover:scale-[1.04] hover:bg-blue-50 dark:hover:bg-[#1e3a8a]/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                    />
+                  </svg>
+                  <span>{isDownloadingPdf ? "Generando..." : "Descargar PDF"}</span>
+                </button>
+              )}
               {report && (
                 <button
                   onClick={handleDownload}

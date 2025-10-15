@@ -1,17 +1,15 @@
 from fastapi import APIRouter, UploadFile, Form, HTTPException
-# Importamos la nueva función list_bucket_files
 from app.services.supabase_registry import upload_file_to_bucket, insert_record, list_bucket_files
 
 router = APIRouter()
 
-# Nuevo endpoint GET para obtener todos los flujos/archivos
 @router.get("/flows")
 async def get_all_flows():
     """
     Recupera todos los archivos (flujos) de los buckets 'history' y 'nifi-docs' de Supabase Storage.
     """
     # Lista de buckets que queremos consultar
-    TARGET_BUCKETS = ["history", "nifi-docs"]
+    TARGET_BUCKETS = ["history"]
     
     all_files = []
     error_details = []
@@ -21,15 +19,12 @@ async def get_all_flows():
         result = list_bucket_files(bucket_name)
 
         if result.get("status") == "ok":
-            # Si tiene éxito, añadimos los archivos al resultado final
-            # También incluimos el nombre del bucket en cada archivo para saber de dónde proviene
             bucket_files = [
                 {**file_metadata, "bucket": bucket_name} 
                 for file_metadata in result.get("data", [])
             ]
             all_files.extend(bucket_files)
         else:
-            # Si hay un error, lo registramos pero continuamos con el siguiente bucket
             error_details.append({
                 "bucket": bucket_name,
                 "error": result.get("detail", "Error desconocido al listar el bucket.")

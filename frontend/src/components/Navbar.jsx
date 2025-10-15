@@ -485,6 +485,7 @@ const Navbar = () => {
   // Enlaces traducidos
   const navItems = [
     { name: t("upload"), path: "/upload" },
+    { name: "Dashboard", path: "/dashboard" },
     { name: t("reports"), path: "/reports" },
     { name: t("about"), path: "/about" },
   ];

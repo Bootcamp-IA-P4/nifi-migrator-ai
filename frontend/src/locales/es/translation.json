@@ -1,0 +1,102 @@
+{
+    "welcome": "Bienvenido de nuevo",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "alreadyAccount": "¿Ya tienes una cuenta?",
+    "noAccount": "No se encontró una cuenta. Regístrate primero.",
+    "invalidCredentials": "Credenciales inválidas. Intenta nuevamente.",
+    "startMigration": "Iniciar Migración",
+    "signupTagline": "Crea tu cuenta y comienza a automatizar tus migraciones de NiFi.",
+    "aiTitle": "Automatiza tu migración de NiFi con IA ⚙️",
+    "aiDescription": "De 1.x → 2.x — más rápido, seguro y completamente automatizado.",
+  
+    "home": {
+      "hero": {
+        "badge": "Migración NiFi 1.x → 2.x con IA",
+        "title1": "El futuro de la",
+        "title2": "Migración NiFi",
+        "title3": "está",
+        "title4": "automatizado con IA",
+        "subtitle": "Sube tu plantilla NiFi 1.x y deja que nuestros agentes de IA gestionen todo el proceso hacia una migración 2.x fluida.",
+        "uploadBtn": "Subir XML",
+        "reportsBtn": "Ver Reportes"
+      },
+      "stats": {
+        "automation": "Automatización",
+        "agents": "Agentes de IA",
+        "processors": "Procesadores Mapeados",
+        "errors": "Errores Manuales"
+      },
+      "features": {
+        "title": "¿Por qué usar NiFi Migrator AI?",
+        "subtitle": "Ahorra tiempo, elimina errores y deja que la IA haga el trabajo pesado.",
+        "upload": {
+          "title": "Sube tu XML NiFi",
+          "desc": "Carga fácilmente tu flujo NiFi 1.x para su análisis y mapeo automático."
+        },
+        "ai": {
+          "title": "Análisis impulsado por IA",
+          "desc": "Aprovecha agentes CrewAI para optimizar y automatizar la migración."
+        },
+        "reports": {
+          "title": "Reportes Detallados",
+          "desc": "Obtén informes estructurados y listos para auditoría y cumplimiento."
+        },
+        "errors": {
+          "title": "Detección de Errores",
+          "desc": "Detecta procesadores obsoletos antes de la migración."
+        }
+      },
+      "plans": {
+        "title": "Elige tu Plan de Migración",
+        "subtitle": "Escala tu proceso de migración — desde tu primer XML hasta una automatización total.",
+        "cta": "Comenzar",
+        "scroll": "Desliza para explorar los planes",
+        "starter": {
+          "name": "Starter",
+          "desc": "Perfecto para pequeños equipos o pruebas iniciales.",
+          "price": "Gratis (Acceso MVP)",
+          "features": [
+            "Migración de un solo flujo",
+            "Análisis de compatibilidad con IA",
+            "Reporte descargable",
+            "Soporte básico por chat"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "desc": "Automatización avanzada e informes inteligentes para equipos medianos.",
+          "price": "Nivel Profesional",
+          "features": [
+            "Procesamiento multi-flujo",
+            "Orquestación con agentes CrewAI",
+            "Reportes inteligentes",
+            "Dashboard con métricas",
+            "Notificaciones por correo"
+          ]
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "desc": "Diseñado para organizaciones que escalan la migración de forma masiva.",
+          "price": "Personalizado Enterprise",
+          "features": [
+            "Clusters de IA multi-entorno",
+            "Integraciones personalizadas",
+            "Soporte y formación dedicados",
+            "Integración API + CI/CD",
+            "Suite de seguridad y cumplimiento"
+          ]
+        }
+      },
+      "cta": {
+        "title": "¿Lista para comenzar tu migración?",
+        "subtitle": "Inicia tu migración impulsada por IA y recibe tu informe completo en minutos.",
+        "button": "Iniciar Migración"
+      }
+    }
+  }
+  
+  

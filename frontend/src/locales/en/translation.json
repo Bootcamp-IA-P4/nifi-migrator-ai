@@ -1,0 +1,106 @@
+{
+    "welcome": "Welcome back",
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "alreadyAccount": "Already have an account?",
+    "noAccount": "No account found. Please sign up first.",
+    "invalidCredentials": "Invalid credentials. Try again.",
+    "startMigration": "Start Migration",
+    "signupTagline": "Create your account and start automating your NiFi migrations.",
+    "aiTitle": "Automate your NiFi migration with AI ⚙️",
+    "aiDescription": "From 1.x → 2.x — faster, safer, and fully automated.",
+  
+    "home": {
+      "hero": {
+        "badge": "NiFi 1.x → 2.x Migration with AI",
+        "title1": "The Future of",
+        "title2": "NiFi Migration",
+        "title3": "is",
+        "title4": "Automated by AI",
+        "subtitle": "Upload your NiFi 1.x template and let our AI agents handle everything for a seamless 2.x migration.",
+        "uploadBtn": "Upload XML",
+        "reportsBtn": "View Reports"
+      },
+      "stats": {
+        "automation": "Automation",
+        "agents": "AI Agents",
+        "processors": "Processors Mapped",
+        "errors": "Manual Errors"
+      },
+      "features": {
+        "title": "Why NiFi Migrator AI?",
+        "subtitle": "Save time, eliminate errors, and let AI do the heavy lifting.",
+        "upload": {
+          "title": "Upload NiFi XML",
+          "desc": "Easily upload your NiFi 1.x flow for automated analysis and mapping."
+        },
+        "ai": {
+          "title": "AI-Powered Insights",
+          "desc": "Leverage CrewAI agents for optimization and smart migration paths."
+        },
+        "reports": {
+          "title": "Detailed Reports",
+          "desc": "Receive structured, human-readable reports ready for compliance."
+        },
+        "errors": {
+          "title": "Error Detection",
+          "desc": "Detect deprecated processors before migration."
+        }
+      },
+      "plans": {
+        "title": "Choose your Migration Plan",
+        "subtitle": "Scale your migration journey — from your first XML upload to full automation.",
+        "cta": "Get Started",
+        "scroll": "Scroll to explore all plans",
+        "starter": {
+          "name": "Starter",
+          "desc": "Perfect for small teams or testing your first flow.",
+          "price": "Free (MVP Access)",
+          "features": [
+            "Single-flow migration",
+            "AI compatibility check",
+            "Downloadable report",
+            "Basic support via chat"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "desc": "Advanced automation and smart insights for teams.",
+          "price": "Professional Tier",
+          "features": [
+            "Multi-flow processing",
+            "CrewAI agent orchestration",
+            "Smart migration reports",
+            "Dashboard with metrics",
+            "Email notifications"
+          ]
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "desc": "For organizations managing large-scale NiFi migrations.",
+          "price": "Custom Enterprise",
+          "features": [
+            "Multi-tenant AI clusters",
+            "Custom integrations",
+            "Dedicated support",
+            "API + CI/CD access",
+            "Security compliance suite"
+          ]
+        }
+      },
+      "cta": {
+        "title": "Ready to start your migration?",
+        "subtitle": "Launch your AI-powered NiFi migration and receive your full report in minutes.",
+        "button": "Start Migration"
+      }
+    }
+  }
+  
+
+
+  
+  
+  

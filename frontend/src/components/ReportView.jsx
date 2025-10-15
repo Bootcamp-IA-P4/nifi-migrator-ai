@@ -4,7 +4,18 @@ import MermaidChart from "./MermaidChart";
 import { sanitizeMermaid } from "../utils/MermaidSanitizer";
 
 const ReportView = ({ report }) => {
-  if (!report) return null;
+
+  if (!report) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
+        <FileText className="w-16 h-16 text-gray-300 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-700">Esperando análisis</h3>
+        <p className="text-gray-500 mt-2">
+          Sube un archivo XML para ver el informe de migración aquí.
+        </p>
+      </div>
+    );
+  }
 
   // --- Helpers seguros ---
   const safeArray = (val) => (Array.isArray(val) ? val : []);
@@ -33,16 +44,12 @@ const ReportView = ({ report }) => {
       {items.map((item, idx) => {
         let content = "";
         if (typeof item === "object" && item !== null) {
-          // --- INICIO DE LA MODIFICACIÓN ---
-          // Adaptado para reconocer los campos del nuevo backend (nifi1_name)
-          // y mostrar un resumen simple en una sola línea, manteniendo el estilo.
           if (item.nifi1_name && item.nifi1_type) {
             const friendlyStatus = statusTranslations[item.status] || item.status;
             content = `${item.nifi1_name} | Tipo: ${item.nifi1_type} | Estado: ${friendlyStatus}`;
           } else {
             content = JSON.stringify(item);
           }
-          // --- FIN DE LA MODIFICACIÓN ---
         } else {
           content = String(item);
         }
@@ -96,9 +103,11 @@ const ReportView = ({ report }) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <FileText className="text-indigo-600 w-6 h-6" />
-        <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <FileText className="text-indigo-600 w-6 h-6" />
+          <h2 className="text-2xl font-bold text-gray-900">Informe Generado</h2>
+        </div>
       </div>
 
       {resumen &&

@@ -17,6 +17,7 @@ class Report(BaseModel):
     structured: Optional[Dict[str, Any]] = None
     raw_markdown: Optional[str] = None 
     error: Optional[str] = None
+    report_filename: Optional[str] = None
 
 # modelos para el chatbot:
 

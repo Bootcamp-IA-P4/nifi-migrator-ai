@@ -87,12 +87,12 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-inter transition-colors duration-500 overflow-hidden">
       {/* 🌙 Dark Mode Toggle */}
-      <button
+      {/* <button
         onClick={toggleDarkMode}
         className="fixed top-6 right-6 z-50 p-3 rounded-full bg-white dark:bg-[#1e293b] shadow-md hover:scale-105 transition-all"
       >
         {darkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-[#006fff]" />}
-      </button>
+      </button> */}
 
       {/* --- HERO --- */}
       <section className="relative h-[90vh] flex flex-col justify-center items-center text-center overflow-hidden">
@@ -155,6 +155,118 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* --- CASE STUDIES SECTION (REAL TECH IMPACT AUTO CAROUSEL) --- */}
+      <section className="relative py-28 bg-gradient-to-b from-[#001d3d] via-[#002b5b] to-[#004aad] text-white overflow-hidden">
+        {(() => {
+          const carouselRef = useRef(null);
+
+          useEffect(() => {
+            const carousel = carouselRef.current;
+            if (!carousel) return;
+
+            let scrollPosition = 0;
+            const scrollSpeed = 0.5; // ⚙️ velocidad más fluida (ajusta entre 0.3 y 1)
+            const animate = () => {
+              if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth) {
+                carousel.scrollLeft = 0; // vuelve al inicio
+              } else {
+                carousel.scrollLeft += scrollSpeed;
+              }
+              requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+
+            return () => cancelAnimationFrame(animate);
+          }, []);
+
+          return (
+            <div className="max-w-7xl mx-auto px-6">
+              {/* Header */}
+              <div className="text-center mb-16">
+                <span className="inline-flex items-center gap-2 px-4 py-1 text-sm bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20">
+                  {t("home.caseStudies.badge")}
+                </span>
+                <h2 className="text-4xl md:text-5xl font-bold mt-6 leading-tight">
+                  {t("home.caseStudies.title")}{" "}
+                  <span className="text-blue-400">NiFi Migrator AI</span>
+                </h2>
+                <p className="mt-4 text-blue-100 max-w-3xl mx-auto">
+                  {t("home.caseStudies.subtitle")}
+                </p>
+              </div>
+
+              {/* Auto sliding cards */}
+              <div
+                ref={carouselRef}
+                className="flex gap-10 overflow-hidden scroll-smooth transition-transform duration-700"
+              >
+                {t("home.caseStudies.cases", { returnObjects: true }).map((caseItem, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: i * 0.2 }}
+                    className="relative bg-white/10 rounded-2xl overflow-hidden border border-blue-500/20 hover:shadow-blue-400/20 hover:-translate-y-2 transition-all duration-500 min-w-[360px] lg:min-w-[420px]"
+                  >
+                    <div className="overflow-hidden h-60">
+                      <img
+                        src={
+                          caseItem.img ||
+                          [
+                            "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80",
+                            "https://images.unsplash.com/photo-1629904853893-c2c8981a1dc5?auto=format&fit=crop&w=1000&q=80",
+                            "https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1000&q=80",
+                            "https://plus.unsplash.com/premium_photo-1680700308578-b40c7418e997?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2574",
+                            "https://images.unsplash.com/photo-1605902711622-cfb43c4437b5?auto=format&fit=crop&w=900&q=80",
+                          ][i % 5]
+                        }
+                        alt={caseItem.title}
+                        className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="p-8">
+                      <div className="text-3xl font-bold text-blue-400">{caseItem.stat}</div>
+                      <div className="text-sm uppercase tracking-wide text-blue-200 mb-4">
+                        {caseItem.label}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-3">{caseItem.title}</h3>
+                      <p className="text-blue-100">{caseItem.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,111,255,0.25),transparent_70%)] pointer-events-none"></div>
+      </section>
+
+      {/* --- HOW IT WORKS --- */}
+      <section className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-center">
+        <h2 className="text-4xl font-bold mb-12 text-[#006fff]">
+          {t("home.features.title")}
+        </h2>
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10 px-6">
+          {t("home.features.steps", { returnObjects: true }).map((step, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.05 }}
+              className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300 hover:shadow-blue-200 dark:hover:shadow-blue-900"
+            >
+              <h3 className="text-xl font-semibold mb-3 text-[#006fff]">
+                {step.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                {step.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+
 
       {/* --- WHY USE NIFI MIGRATOR AI --- */}
       <section className="relative py-24 bg-gradient-to-b from-[#0f172a] to-[#001d3d] text-white overflow-hidden">
@@ -190,30 +302,26 @@ const Home = () => {
         </div>
       </section>
 
-
-      {/* --- HOW IT WORKS --- */}
+      {/* --- USE CASES --- */}
       <section className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-center">
         <h2 className="text-4xl font-bold mb-12 text-[#006fff]">
-          {t("home.features.title")}
+          {t("home.useCases.title")}
         </h2>
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10 px-6">
-          {t("home.features.steps", { returnObjects: true }).map((step, i) => (
+          {t("home.useCases.items", { returnObjects: true }).map((user, i) => (
             <motion.div
               key={i}
               whileHover={{ scale: 1.05 }}
               className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300 hover:shadow-blue-200 dark:hover:shadow-blue-900"
             >
-              <h3 className="text-xl font-semibold mb-3 text-[#006fff]">
-                {step.title}
-              </h3>
+              <h3 className="text-xl font-semibold mb-3">{user.title}</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                {step.desc}
+                {user.desc}
               </p>
             </motion.div>
           ))}
         </div>
       </section>
-
       {/* --- TECH ADVANTAGES --- */}
       <section className="relative py-28 bg-gradient-to-b from-[#001d3d] via-[#002b5b] to-[#004aad] text-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,111,255,0.15),transparent_70%)] blur-3xl"></div>
@@ -251,26 +359,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- USE CASES --- */}
-      <section className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-center">
-        <h2 className="text-4xl font-bold mb-12 text-[#006fff]">
-          {t("home.useCases.title")}
-        </h2>
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10 px-6">
-          {t("home.useCases.items", { returnObjects: true }).map((user, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300 hover:shadow-blue-200 dark:hover:shadow-blue-900"
-            >
-              <h3 className="text-xl font-semibold mb-3">{user.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                {user.desc}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* --- PLANS --- */}
       <section className="py-28 bg-gradient-to-b from-white via-slate-50 to-white dark:from-[#0f172a] dark:via-[#1e293b] dark:to-[#0f172a] text-center">
@@ -323,7 +411,7 @@ const Home = () => {
           ))}
         </div>
       </section>
-
+    
       {/* --- CTA FINAL --- */}
       <section className="py-28 bg-[#006fff] text-center text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1533745848184-3db07256e163?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center opacity-20"></div>

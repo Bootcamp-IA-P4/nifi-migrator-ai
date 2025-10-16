@@ -21,7 +21,7 @@
       "title3": "está",
       "title4": "automatizado con IA",
       "subtitle": "Sube tu plantilla NiFi 1.x y deja que nuestros agentes de IA gestionen todo el proceso hacia una migración 2.x fluida.",
-      "uploadBtn": "Subir XML",
+      "uploadBtn": "Subir flujos",
       "reportsBtn": "Ver Reportes",
       "rotating": ["Migración", "Automatización", "Inteligencia"]
     },
@@ -68,6 +68,39 @@
         }
       ]
     },
+
+    "caseStudies": {
+      "badge": "Arquitectura de Agentes Inteligentes",
+      "title": "Cómo NiFi Migrator AI ejecuta la migración con precisión",
+      "subtitle": "El sistema utiliza una arquitectura CrewAI compuesta por agentes especializados que trabajan en cadena para analizar, convertir, validar y documentar automáticamente cada flujo de NiFi. Esta colaboración garantiza migraciones seguras, trazables y sin intervención manual.",
+      "cases": [
+        {
+          "title": "Analyzer Agent",
+          "desc": "Este agente analiza el flujo NiFi 1.x línea por línea, identificando procesadores, controladores, relaciones y dependencias. Genera un grafo estructural que sirve de base para la conversión automática."
+        },
+        {
+          "title": "Converter Agent",
+          "desc": "Recibe la estructura del Analyzer y transforma los componentes obsoletos a su equivalente en NiFi 2.x. Aplica reglas de compatibilidad, mantiene configuraciones y adapta propiedades a las nuevas versiones."
+        },
+        {
+          "title": "Critic Agent",
+          "desc": "Evalúa la conversión generada por el Converter. Compara el flujo original con el nuevo, detecta inconsistencias y prioriza ajustes automáticos mediante razonamiento semántico y validación contextual."
+        },
+        {
+          "title": "Validator Agent",
+          "desc": "Ejecuta pruebas sintácticas y lógicas sobre el flujo convertido para garantizar que todas las conexiones y referencias funcionen correctamente antes de generar el informe final."
+        },
+        {
+          "title": "Report Generator Agent",
+          "desc": "Crea un informe técnico detallado con los resultados del análisis y la conversión. Incluye equivalencias, dependencias, observaciones y sugerencias de optimización. El reporte puede descargarse en PDF o JSON."
+        }
+      ],
+      "cta": {
+        "label": "Explorar arquitectura completa",
+        "link": "/docs/architecture"
+      }
+    },
+
     "useCases": {
       "title": "¿Para quién está diseñado?",
       "items": [
@@ -87,7 +120,7 @@
     },
     "plans": {
       "title": "Elige tu Plan de Migración",
-      "subtitle": "Escala tu proceso de migración — desde tu primer XML hasta una automatización total.",
+      "subtitle": "Escala tu proceso de migración — desde tu primer flujo hasta una automatización total.",
       "cta": "Comenzar",
       "starter": {
         "name": "Starter",
@@ -134,13 +167,13 @@
 
   "uploadPage": {
     "title": "Migrador NiFi 1.x → 2.x",
-    "description": "Sube tu archivo XML exportado desde NiFi 1.x y obtén un informe detallado con el mapeo de propiedades, procesadores y recomendaciones para migrar fácilmente a NiFi 2.x.",
+    "description": "Sube tus Flujos de Nifi exportado desde NiFi 1.x y obtén un informe detallado con el mapeo de propiedades, procesadores y recomendaciones para migrar fácilmente a NiFi 2.x.",
     "ctaDocs": "Ver documentación",
-    "sectionTitle": "Cargar flujo de Nifi",
-    "sectionDescription": "Carga tu flujo exportado desde NiFi 1.x para generar un informe automático de migración.",
-    "instructionsTitle": "📋 Instrucciones",
+    "sectionTitle": "Cargar Flujos de NiFi",
+    "sectionDescription": "Carga tus Flujos exportados desde NiFi 1.x para generar un informe automático de migración.",
+    "instructionsTitle": "Instrucciones",
     "instructions": [
-      "El archivo debe ser un .xml exportado desde NiFi 1.x.",
+      "El archivo debe ser exportado desde NiFi 1.x.",
       "Tamaño máximo: 5 MB.",
       "Presiona “Subir archivo” o arrástralo en el recuadro."
     ],
@@ -151,11 +184,11 @@
     "downloadJSON": "Descargar JSON",
     "generating": "Generando...",
     "noReportTitle": "Aún no hay informe generado.",
-    "noReportDescription": "Sube un archivo XML en el panel izquierdo para comenzar."
+    "noReportDescription": "Sube un Flujos de Nifi en el panel izquierdo para comenzar."
   },
 
   "uploadForm": {
-    "dragAndDrop": "Arrastra y suelta tu archivo XML aquí",
+    "dragAndDrop": "Arrastra y suelta tu Flujos de Nifi aquí",
     "orClick": "o haz clic para seleccionar un archivo",
     "maxSize": "Tamaño máximo permitido: 5 MB",
     "analyzeAndSave": "Analizar y Guardar",
@@ -164,5 +197,26 @@
     "completed": "✅ Análisis completado con éxito.",
     "error": "❌ Error en el análisis:",
     "noFile": "⚠️ Por favor, selecciona un archivo."
-  }
+  },
+  
+  "navbar": {
+  "upload": "Cargar",
+  "dashboard": "Panel de control",
+  "reports": "Informes",
+  "about": "Acerca de",
+  "language": "Idioma",
+  "settingsTooltip": "Configuración",
+  "appearance": "🌗 Apariencia",
+  "switchToLight": "Cambiar a modo claro",
+  "switchToDark": "Cambiar a modo oscuro",
+  "apiKeys": "🔑 Claves API",
+  "saveKeys": "Guardar todas las claves",
+  "apiPlaceholder": "Introduce tu clave {{key}}",
+  "close": "Cerrar",
+  "menu": "Menú",
+  "logoutConfirm": "¿Estás segura de que quieres cerrar sesión?"
+},
+"alerts": {
+  "apiKeysSaved": "✅ Claves API guardadas correctamente."
+}
 }

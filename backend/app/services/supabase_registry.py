@@ -4,6 +4,7 @@ from supabase import create_client
 import re
 import unicodedata
 import pandas as pd
+import csv
 from app.core.config import settings
 
 # Cliente con clave anónima
@@ -75,16 +76,29 @@ def upload_csv_to_supabase(csv_file_path: str, table_name: str):
     Reads a CSV file and uploads its content to a Supabase table.
     """
     print(f"[Supabase] Uploading data from {csv_file_path} to table {table_name}...")
+    data_to_insert = []
     try:
-        df = pd.read_csv(csv_file_path)
-        # Convert DataFrame to a list of dictionaries
-        data_to_insert = df.to_dict(orient='records')
+        with open(csv_file_path, 'r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            header = next(reader)  # Read header row
+            # Clean up header to match expected dictionary keys (remove BOM if present)
+            header = [h.strip().replace('\ufeff', '') for h in header]
 
-        # Insert data in batches if it's too large, or all at once
-        # Supabase's insert can handle multiple records
-        result = supabase.table(table_name).insert(data_to_insert).execute()
-        print(f"[Supabase] Upload completed for {csv_file_path}. Inserted {len(result.data)} records.")
-        return {"status": "ok", "inserted_count": len(result.data)}
+            for i, row in enumerate(reader):
+                if len(row) == len(header):
+                    row_dict = dict(zip(header, row))
+                    data_to_insert.append(row_dict)
+                else:
+                    print(f"[Supabase WARNING] Skipping malformed row {i+2} in CSV: Expected {len(header)} fields, but got {len(row)}. Row: {row}")
+
+        if data_to_insert:
+            result = supabase.table(table_name).insert(data_to_insert).execute()
+            print(f"[Supabase] Upload completed for {csv_file_path}. Inserted {len(result.data)} records.")
+            return {"status": "ok", "inserted_count": len(result.data)}
+        else:
+            print(f"[Supabase WARNING] No valid data found to insert from {csv_file_path}.")
+            return {"status": "warning", "detail": "No valid data to insert."}
+
     except Exception as e:
         print(f"[Supabase ERROR] Failed to upload CSV to Supabase: {e}")
         import traceback

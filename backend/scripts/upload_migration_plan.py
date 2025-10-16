@@ -11,7 +11,7 @@ from app.core.config import settings
 if __name__ == "__main__":
     # Construct the absolute path to the CSV file
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    csv_file_path = os.path.join(base_dir, "data", "migration_plan_fixed.csv")
+    csv_file_path = os.path.join(base_dir, "backend", "data", "migration_plan_fixed.csv")
     
     supabase_table_name = settings.SUPABASE_MIGRATION_TABLE
 

@@ -71,6 +71,27 @@ def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUC
         print(f"Error downloading report '{report_id}' from bucket '{bucket}': {e}")
         return None
 
+def truncate_table(table_name: str):
+    """
+    Deletes all records from a specified Supabase table.
+    """
+    print(f"[Supabase] Truncating table '{table_name}'...")
+    try:
+        # Supabase doesn't have a direct 'truncate' method in its client library
+        # The way to clear a table is to delete all records.
+        result = supabase.table(table_name).delete().gt("id", 0).execute()
+        # The .gt("id", 0) is a common pattern to ensure all rows are targeted
+        # assuming 'id' is a primary key and starts from 1.
+        # If the table might be empty or 'id' can be 0, a simpler .delete().neq("id", None)
+        # or just .delete().execute() might be used, but .gt("id", 0) is safer if 'id' is always positive.
+        print(f"[Supabase] Table '{table_name}' truncated. Deleted {len(result.data)} records.")
+        return {"status": "ok", "deleted_count": len(result.data)}
+    except Exception as e:
+        print(f"[Supabase ERROR] Failed to truncate table '{table_name}': {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "detail": str(e)}
+
 def upload_csv_to_supabase(csv_file_path: str, table_name: str):
     """
     Reads a CSV file and uploads its content to a Supabase table.

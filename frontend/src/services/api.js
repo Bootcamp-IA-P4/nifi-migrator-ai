@@ -107,3 +107,31 @@ export const downloadPdfByReportId = async (reportId) => {
     throw new Error(errorMsg);
   }
 };
+
+
+// Servicio para obtener la lista de informes desde Supabase
+
+export const getAllReports = async () => {
+  try {
+    const response = await api.get("/reports");
+    return response.data.reports || []; 
+  } catch (error) {
+    const errorMsg = error.response?.data?.detail || error.message;
+    console.error("Error en getAllReports:", errorMsg);
+    throw new Error(errorMsg);
+  }
+};
+
+
+// Servicio para auditar un informe guardado
+
+export const auditStoredReport = async (reportId) => {
+  try {
+    const response = await api.post("/audit/stored", { report_id: reportId });
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.detail || error.message;
+    console.error("Error en auditStoredReport:", errorMsg);
+    throw new Error(errorMsg);
+  }
+};

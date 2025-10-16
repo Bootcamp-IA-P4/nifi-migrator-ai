@@ -70,13 +70,15 @@ async def upload_template(file: UploadFile, bucket: str = Form("history")):
 
 @router.get("/reports", summary="Lista todos los informes guardados en Supabase")
 async def list_all_reports():
-    """
-    Obtiene una lista de todos los archivos de informe (.md) almacenados en el bucket de informes de Supabase.
-    """
     try:
-        files = supabase_registry.list_files_in_bucket(settings.SUPABASE_BUCKET_REPORTS)
+        result = list_bucket_files(settings.SUPABASE_BUCKET_REPORTS)
+        
+        if result.get("status") != "ok":
+            raise HTTPException(status_code=500, detail=result.get("detail", "Error desconocido al listar informes."))
+
+        files = result.get("data", [])
         report_files = [file for file in files if file['name'].endswith('.md')]
         return {"reports": report_files}
     except Exception as e:
         print(f"[Route ERROR] Error al listar informes: {e}")
-        raise HTTPException(status_code=500, detail=f"No se pudieron obtener los informes: {e}")
+        raise HTTPException(status_code=500, detail=f"No se pudieron obtener los informes: {str(e)}")

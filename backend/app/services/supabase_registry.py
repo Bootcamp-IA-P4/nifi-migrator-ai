@@ -3,6 +3,7 @@ import io
 from supabase import create_client
 import re
 import unicodedata
+import pandas as pd
 from app.core.config import settings
 
 # Cliente con clave anónima
@@ -68,3 +69,24 @@ def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUC
     except Exception as e:
         print(f"Error downloading report '{report_id}' from bucket '{bucket}': {e}")
         return None
+
+def upload_csv_to_supabase(csv_file_path: str, table_name: str):
+    """
+    Reads a CSV file and uploads its content to a Supabase table.
+    """
+    print(f"[Supabase] Uploading data from {csv_file_path} to table {table_name}...")
+    try:
+        df = pd.read_csv(csv_file_path)
+        # Convert DataFrame to a list of dictionaries
+        data_to_insert = df.to_dict(orient='records')
+
+        # Insert data in batches if it's too large, or all at once
+        # Supabase's insert can handle multiple records
+        result = supabase.table(table_name).insert(data_to_insert).execute()
+        print(f"[Supabase] Upload completed for {csv_file_path}. Inserted {len(result.data)} records.")
+        return {"status": "ok", "inserted_count": len(result.data)}
+    except Exception as e:
+        print(f"[Supabase ERROR] Failed to upload CSV to Supabase: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "detail": str(e)}

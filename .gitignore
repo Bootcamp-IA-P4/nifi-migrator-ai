@@ -109,5 +109,6 @@ Thumbs.db
 
 # === Generated application files ===
 backend/data/reports/
+backend/data/old_csvs/
 backend/nifi-flows/nifi-templates/
 backend/data/

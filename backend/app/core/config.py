@@ -25,6 +25,7 @@ class Settings:
 
     # Bucket flow para los PDFs de documentación técnica
     SUPABASE_BUCKET_FLOW: str = os.getenv("SUPABASE_BUCKET_FLOW", "flow")
+    SUPABASE_MIGRATION_TABLE: str = os.getenv("SUPABASE_MIGRATION_TABLE", "migration_plans")
     
     # --- OTRAS CONFIGURACIONES ---
     # Dataset para validación del auditor

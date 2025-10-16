@@ -1,34 +1,43 @@
-import pandas as pd
 import os
+from app.services.supabase_registry import supabase # Import the Supabase client
+from app.core.config import settings # Import settings to get the table name
 
 class MigrationPlanProvider:
     _instance = None
+    _initialized = False # Add an initialization flag
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(MigrationPlanProvider, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, csv_path='data/migration_plan_fixed.csv'):
-        # Evita la reinicialización si la instancia ya existe
-        if hasattr(self, '_initialized') and self._initialized:
+    def __init__(self): # Remove csv_path parameter
+        if self._initialized:
             return
-        
-        # Construye la ruta absoluta al CSV desde la ubicación de este fichero
-        # __file__ -> .../backend/app/services/migration_plan_provider.py
-        # os.path.dirname(__file__) -> .../backend/app/services
-        # os.path.join(..., '..', '..') -> .../backend
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        absolute_csv_path = os.path.join(base_dir, csv_path)
 
-        if not os.path.exists(absolute_csv_path):
-            self._data = {}
-            print(f"ADVERTENCIA: No se encontró el archivo CSV en {absolute_csv_path}. El proveedor de plan de migración estará vacío.")
-        else:
-            df = pd.read_csv(absolute_csv_path, engine='python', sep=',')
-            # Normalizar el nombre del componente para que sirva como clave fiable
-            df['lookup_key'] = df['component_name'].str.lower().str.strip()
-            self._data = df.set_index('lookup_key').to_dict(orient='index')
+        print("[MigrationPlanProvider] Initializing with Supabase data...")
+        self._data = {}
+        try:
+            # Fetch data from Supabase
+            table_name = settings.SUPABASE_MIGRATION_TABLE
+            response = supabase.table(table_name).select("*").execute()
+            
+            if response.data:
+                # Convert fetched data to a dictionary for quick lookup
+                for record in response.data:
+                    # Assuming 'nifi1_component' is the key for lookup
+                    component_name = record.get("nifi1_component")
+                    if component_name:
+                        self._data[component_name.lower().strip()] = record
+                print(f"[MigrationPlanProvider] Loaded {len(self._data)} records from Supabase table '{table_name}'.")
+            else:
+                print(f"[MigrationPlanProvider] No data found in Supabase table '{table_name}'.")
+
+        except Exception as e:
+            print(f"[MigrationPlanProvider ERROR] Failed to load data from Supabase: {e}")
+            import traceback
+            traceback.print_exc()
+            self._data = {} # Ensure data is empty on error
         
         self._initialized = True
 

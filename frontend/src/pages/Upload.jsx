@@ -29,7 +29,8 @@ const Upload = () => {
     showToast(`${t("uploadForm.dragAndDrop")}: ${file.name}`, "info");
   };
 
-  const handleDownload = () => {
+  // Renamed for clarity
+  const handleDownloadJson = () => {
     if (!report) return;
     try {
       const element = document.createElement("a");

@@ -13,19 +13,17 @@ def rag_search(query: str, k: int = 5):
 def get_context_for_agents(query: str, k: int = 5, sep: str = "\n---\n") -> str:
     parts = []
 
+    print(f"🔍 Priorizando búsqueda en tabla de Supabase para equivalencias de migración...")
+
     # 1. Prioritize direct lookup in Supabase for migration plans
-    # This is a heuristic: if the query contains a potential component name, try to look it up.
-    # A more sophisticated approach would involve NLP to extract component names.
-    # For now, let's assume the query might directly contain a component name.
-    
-    # Extract potential component names from the query (simple heuristic)
-    # This is a very basic attempt. A real solution would need more robust entity extraction.
     potential_component_names = re.findall(r'[a-zA-Z0-9\._-]+', query) # Matches words, dots, hyphens
 
     found_direct_plan = False
     for comp_name in potential_component_names:
+        print(f"✨ Buscando plan de migración para componente: {comp_name}")
         plan = migration_plan_provider.find_component(comp_name)
         if plan:
+            print(f"✅ ¡Plan de migración encontrado en Supabase para {plan.get('nifi1_component')}!")
             parts.append(f"[Fuente: Supabase Migration Plan - {plan.get('nifi1_component')}]\n"
                          f"Estado: {plan.get('status')}\n"
                          f"Equivalente NiFi 2: {plan.get('nifi2_equivalent')}\n"
@@ -38,9 +36,12 @@ def get_context_for_agents(query: str, k: int = 5, sep: str = "\n---\n") -> str:
 
     # 2. Fallback to general RAG search if no direct plan is found or for broader context
     if not found_direct_plan:
+        print(f"📚 No se encontró plan directo en Supabase. Realizando búsqueda RAG en documentos...")
         docs = rag_search(query, k=k)
         for d in docs:
             src = d.metadata.get("source", "unknown")
             parts.append(f"[Fuente: {src}]\n{d.page_content}")
+    else:
+        print(f"ℹ️ Contexto enriquecido con plan de migración de Supabase. No se realizará búsqueda RAG adicional.")
     
     return sep.join(parts)

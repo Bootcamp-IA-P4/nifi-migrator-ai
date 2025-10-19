@@ -3,7 +3,7 @@
 **Proyecto educativo.**
 
 <div align="center">
-  <img src="https://asset.cloudinary.com/artevivo/25509d529fe471caad336342261643b9" alt="Banner centrado" width="900" height="450">
+  <img src="https://res.cloudinary.com/artevivo/image/upload/v1760915770/Captura_de_pantalla_2025-10-20_011329_sxyviv.png" alt="Banner centrado" width="900" height="450">
 </div>
 ---
 
@@ -57,7 +57,7 @@ Nuestra solución se basa en una sofisticada arquitectura de agentes de IA:
 ## 🏗️ Diagrama de Arquitectura
 
 <div align="center">
-  <img src="https://asset.cloudinary.com/artevivo/4b8c56ea91d7669a9e60cd7da5adcd0a" alt="Banner centrado" width="500" height="800">
+  <img src="https://res.cloudinary.com/artevivo/image/upload/v1760915769/Captura_de_pantalla_2025-10-16_202146_lwce4z.png" alt="Banner centrado" width="500" height="800">
 </div>
 
 Nuestra arquitectura está construida con un **frontend en React** conectado mediante APIs a un **backend en FastAPI**, el cual utiliza **CrewAI** para la orquestación de agentes y **Supabase** para almacenamiento y base de conocimiento (RAG).

@@ -209,7 +209,7 @@ const Dashboard = () => {
                           )}
                           {sendingState[flow.name] === "enviado"
                             ? "Enviado"
-                            : "Enviar"}
+                            : "Enviar a Registry"}
                         </button>
 
                         <button

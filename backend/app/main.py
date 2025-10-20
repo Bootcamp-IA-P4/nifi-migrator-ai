@@ -10,7 +10,7 @@ try:
     # from app.routes import help_routes as help
     # from app.routes import validate_routes as validate
     from app.core.config import settings
-    # from app.routes import storage_routes as storage
+    from app.routes import storage_routes as storage
     # from app.routes import audit_routes
     from app.routes import chatbot_routes as chatbot
 
@@ -35,6 +35,7 @@ try:
     # app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
     # app.include_router(audit_routes.router, prefix="/api/v1", tags=["Audit"])
     app.include_router(chatbot.router, prefix="/api/v1", tags=["Chatbot"])
+    app.include_router(storage.router, prefix="/api/v1", tags=["Storage"])
 
     print("✅ Routers NO incluidos.")
 

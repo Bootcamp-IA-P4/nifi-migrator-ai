@@ -30,29 +30,32 @@ async def audit_stored_report(request: StoredAuditRequest):
 
     return audit_result
 
-@router.get("/audit/report/{report_id}/pdf", tags=["Audit"])
-async def download_audit_report_pdf(report_id: str):
-    """
-    Generates and downloads an audit report as a PDF.
-    """
-    report_content_markdown = supabase_registry.get_report_content_by_id(report_id, settings.SUPABASE_BUCKET_REPORTS)
+@router.get("/report/pdf/{report_id}", summary="Descarga un informe guardado como PDF")
+async def download_report_as_pdf(report_id: str):
+    # Recupera un informe .md previamente guardado desde Supabase,lo convierte a PDF y lo devuelve para su descarga.
+    report_id = report_id.strip()
+    # Ensure the report_id always has the .md extension for Supabase lookup
+    final_report_id_for_supabase = report_id if report_id.endswith('.md') else f"{report_id}.md"
 
-    if not report_content_markdown:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Informe '{report_id}' no encontrado."
-        )
-    
     try:
-        pdf_bytes = pdf_generator.create_pdf_from_markdown(report_content_markdown)
-        
-        return StreamingResponse(
-            io.BytesIO(pdf_bytes),
-            media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=\"audit_report_{report_id}.pdf\""}
+        # 1. Descargar el archivo .md desde el bucket de informes
+        markdown_content = supabase_registry.get_report_content_by_id(
+            report_id=final_report_id_for_supabase,
+            bucket=settings.SUPABASE_BUCKET_REPORTS # 'reports'
         )
+        if not markdown_content:
+            raise HTTPException(status_code=404, detail=f"Informe '{report_id}' no encontrado.")
+
+        # 2. Convertir el contenido a PDF
+        pdf_bytes = pdf_generator.create_pdf_from_markdown(markdown_content)
+
+        # 3. Preparar y devolver la respuesta para descarga
+        pdf_download_name = os.path.splitext(report_id)[0] + "_migration_report.pdf"
+        headers = {'Content-Disposition': f'attachment; filename="{pdf_download_name}"'}
+        return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+
+    except HTTPException as e:
+        raise e 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error generando PDF para el informe '{report_id}': {str(e)}"
-        )
+        print(f"[Route ERROR] Error en la ruta /report/pdf/{report_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"No se pudo generar el PDF: {e}")

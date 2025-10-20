@@ -29,8 +29,7 @@ const Upload = () => {
     showToast(`${t("uploadForm.dragAndDrop")}: ${file.name}`, "info");
   };
 
-  // Renamed for clarity
-  const handleDownloadJson = () => {
+  const handleDownload = () => {
     if (!report) return;
     try {
       const element = document.createElement("a");
@@ -175,13 +174,6 @@ const Upload = () => {
               {report && (
                 <>
                   <button
-                    onClick={handleDownloadJson}
-                    className="px-4 py-2 text-sm font-medium text-[#006fff] bg-white dark:bg-[#1e293b] border border-[#006fff]/40 rounded-lg shadow-sm hover:scale-105 transition-all"
-                  >
-                    {t("uploadPage.downloadJSON")}
-                  </button>
-
-                  <button
                     onClick={handleDownloadPdf}
                     disabled={isDownloadingPdf}
                     className="px-4 py-2 text-sm font-medium text-[#006fff] bg-white dark:bg-[#1e293b] border border-[#006fff]/40 rounded-lg shadow-sm hover:scale-105 transition-all"
@@ -189,6 +181,13 @@ const Upload = () => {
                     {isDownloadingPdf
                       ? t("uploadPage.generating")
                       : t("uploadPage.downloadPDF")}
+                  </button>
+
+                  <button
+                    onClick={handleDownload}
+                    className="px-4 py-2 text-sm font-medium text-[#006fff] bg-white dark:bg-[#1e293b] border border-[#006fff]/40 rounded-lg shadow-sm hover:scale-105 transition-all"
+                  >
+                    {t("uploadPage.downloadJSON")}
                   </button>
                 </>
               )}

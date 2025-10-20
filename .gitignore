@@ -1,0 +1,113 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+MANIFEST
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+db.sqlite3
+db.sqlite3-journal
+
+# Virtual envs
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter
+.ipynb_checkpoints
+
+# PyInstaller
+*.manifest
+*.spec
+
+# PDM / Poetry / Pipenv / Pixi
+.pdm-python
+.pdm-build/
+.pixi
+__pypackages__/
+#poetry.lock
+#Pipfile.lock
+#uv.lock
+
+# Ruff / MyPy / Pyre / Pytype
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# === Node.js / Frontend ===
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+build/
+frontend/build/
+backend/build/
+dist-ssr/
+.next/
+.nuxt/
+out/
+coverage/
+.cache/
+.build/
+
+# Lock files (opcional si quieres solo package.json)
+# package-lock.json
+# yarn.lock
+
+# === Logs ===
+*.log
+logs/
+
+# === Env files ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === System files ===
+.DS_Store
+Thumbs.db
+
+# === Editors ===
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === Generated application files ===
+backend/data/reports/
+backend/nifi-flows/nifi-templates/
+backend/data/

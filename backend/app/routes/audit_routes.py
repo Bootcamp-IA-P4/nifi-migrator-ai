@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Body
+import os
+from fastapi import APIRouter, Response, UploadFile, File, HTTPException, Body
 from fastapi.responses import StreamingResponse # Import StreamingResponse
 from app.services import auditor, supabase_registry, pdf_generator # Import pdf_generator
 from app.core.config import settings

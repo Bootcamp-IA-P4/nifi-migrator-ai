@@ -5,22 +5,22 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Mantenemos todo dentro de un bloque try/except para una depuración final.
 try:
-    print("🚀 Iniciando la aplicación completa...")
+    print("🚀 Iniciando PRUEBA DE MEMORIA...")
 
-    # Importaciones de la aplicación
-    from app.routes import analyze_routes as analyze
-    from app.routes import help_routes as help
-    from app.routes import validate_routes as validate
+    # NO importamos las rutas para minimizar el consumo de RAM inicial.
+    # from app.routes import analyze_routes as analyze
+    # from app.routes import help_routes as help
+    # from app.routes import validate_routes as validate
     from app.core.config import settings
-    from app.routes import storage_routes as storage
-    from app.routes import audit_routes
-    from app.routes import chatbot_routes as chatbot
+    # from app.routes import storage_routes as storage
+    # from app.routes import audit_routes
+    # from app.routes import chatbot_routes as chatbot
 
-    print("✅ Módulos de la aplicación importados.")
+    print("✅ Módulos mínimos importados.")
 
     app = FastAPI(
-        title="NiFi Migrator AI",
-        description="API para analizar y migrar flujos NiFi 1.x → 2.x con IA",
+        title="NiFi Migrator AI - Prueba de Memoria",
+        description="Probando el arranque sin las rutas completas",
         version="0.1.0",
     )
 
@@ -34,26 +34,21 @@ try:
         allow_headers=["*"],
     )
 
-    # Inclusión de las rutas de la API
-    app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
-    app.include_router(help.router, prefix="/api/v1", tags=["Help"])
-    app.include_router(validate.router, prefix="/api/v1", tags=["Validate"])
-    app.include_router(storage.router, prefix="/api/v1", tags=["Storage"])
-    app.include_router(audit_routes.router, prefix="/api/v1", tags=["Audit"])
-    app.include_router(chatbot.router, prefix="/api/v1", tags=["Chatbot"])
+    # NO incluimos los routers de la API
+    # app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
+    # ... (el resto de routers están comentados)
 
-    print("✅ Routers incluidos.")
+    print("✅ Routers NO incluidos.")
 
     @app.get("/")
     def read_root():
-        return {"message": "Bienvenido a NiFi Migrator AI 🚀"}
+        return {"message": "¡Prueba de Memoria FUNCIONANDO! El problema está en la importación de las rutas."}
 
-    print("🚀🚀 La aplicación completa está lista para iniciarse. 🚀🚀")
+    print("🚀🚀 La aplicación base (sin rutas) está lista para iniciarse. 🚀🚀")
 
 except Exception as e:
-    # Si algo falla durante la carga de las rutas o servicios, lo veremos aquí.
     print("==========================================================")
-    print("‼️ ERROR FATAL DURANTE EL ARRANQUE DE LA APLICACIÓN COMPLETA ‼️")
+    print("‼️ ERROR FATAL INCLUSO EN LA PRUEBA DE MEMORIA ‼️")
     print(f"Error: {e}")
     print("--- Traceback ---")
     traceback.print_exc(file=sys.stdout)

@@ -3,8 +3,8 @@ from typing import List
 
 # Prompts base
 from .prompts import (
-    ANALYSIS_TASK_DESCRIPTION,
-    ANALYSIS_TASK_EXPECTED_OUTPUT,
+    # ANALYSIS_TASK_DESCRIPTION,  <- No longer a complex task
+    # ANALYSIS_TASK_EXPECTED_OUTPUT, <- Will be defined directly
     MAPPING_TASK_DESCRIPTION,
     MAPPING_TASK_EXPECTED_OUTPUT,
     CONVERSION_TASK_DESCRIPTION,
@@ -16,43 +16,43 @@ from .prompts import (
 # ✅ Nuevo import del RAG combinado
 from app.rag.rag_combined import get_combined_context
 
+# Define the new, simplified analysis task description directly
+ANALYSIS_TASK_DESCRIPTION = (
+    "Analiza el siguiente contenido de un template XML de NiFi 1.x. "
+    "Tu única y exclusiva tarea es identificar todos los procesadores y extraer sus nombres. "
+    "Debes devolver un objeto JSON con una única clave 'components', que contenga una lista de los nombres de los procesadores encontrados. "
+    "Asegúrate de que la lista no contenga nombres duplicados.\n\n"
+    "XML a analizar:\n"
+    "'''{nifi_template_content}'''"
+)
+
 
 class NifiMigrationTasks:
     """
     Define the sequence of AI-driven tasks for NiFi 1.x → 2.x migration.
-    Now enhanced with combined RAG (templates + official PDFs from Supabase).
     """
 
     def analysis_task(self, agent, nifi_template_content: str) -> Task:
-        """🔍 Step 1: Analyze the NiFi 1.x XML template."""
-        rag_query = "Diferencias y estructura del template XML de NiFi 1.x y la migración a 2.x"
-        contexto_docs = get_combined_context(rag_query, k=5)
-
-        formatted_analysis_desc = ANALYSIS_TASK_DESCRIPTION.format(
-            nifi_template_content=nifi_template_content
-        )
-
-        task_description = (
-            f"{formatted_analysis_desc}\n\n"
-            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
-            f"{contexto_docs}"
-        )
-
+        """🔍 Step 1: Parse the NiFi 1.x XML and extract component names."""
         return Task(
-            description=task_description,
-            expected_output=ANALYSIS_TASK_EXPECTED_OUTPUT,
+            description=ANALYSIS_TASK_DESCRIPTION.format(
+                nifi_template_content=nifi_template_content
+            ),
+            expected_output="Un objeto JSON con una clave 'components' que contiene una lista de strings. Ejemplo: {\"components\": [\"GenerateFlowFile\", \"LogAttribute\"]}",
             agent=agent,
         )
 
-    def mapping_task(self, agent, context: List[Task]) -> Task:
+    def mapping_task(self, agent, context: List[Task], supabase_context: str) -> Task:
         """🧩 Step 2: Map NiFi 1.x components to NiFi 2.x equivalents."""
         rag_query = "Mapeo de componentes y propiedades de NiFi 1.28 a NiFi 2.5.0"
-        contexto_docs = get_combined_context(rag_query, k=5)
+        docs_context = get_combined_context(rag_query, k=5)
 
         task_description = (
             f"{MAPPING_TASK_DESCRIPTION}\n\n"
-            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
-            f"{contexto_docs}"
+            f"### Contexto de Equivalencias Directas (Base de Datos):\n"
+            f"'''{supabase_context}'''\n\n"
+            f"### Contexto Adicional (Documentación RAG):\n"
+            f"'''{docs_context}'''"
         )
 
         return Task(
@@ -71,15 +71,17 @@ class NifiMigrationTasks:
             context=[context_task],
         )
 
-    def reporting_task(self, agent, context: List[Task]) -> Task:
+    def reporting_task(self, agent, context: List[Task], supabase_context: str) -> Task:
         """📝 Step 4: Generate the full migration report."""
         rag_query = "Buenas prácticas, patrones y anti-patrones en flujos NiFi"
-        contexto_docs = get_combined_context(rag_query, k=5)
+        docs_context = get_combined_context(rag_query, k=5)
 
         task_description = (
             f"{REPORTING_TASK_DESCRIPTION}\n\n"
-            f"### Contexto de Documentación Oficial y Embeddings RAG\n"
-            f"{contexto_docs}"
+            f"### Contexto de Equivalencias Directas (Base de Datos):\n"
+            f"'''{supabase_context}'''\n\n"
+            f"### Contexto Adicional (Documentación RAG):\n"
+            f"'''{docs_context}'''"
         )
 
         return Task(

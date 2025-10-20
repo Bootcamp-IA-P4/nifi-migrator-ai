@@ -42,7 +42,7 @@ async def unified_analysis(
             raise HTTPException(status_code=500, detail=report_result.error)
 
         # PASO 3: Guarda el informe .md sempre
-        # Verificamos que el archivo exista y lo subimos usando su ruta
+        report_filename_supabase = None 
         if report_result.raw_markdown:
             report_filename_supabase = os.path.splitext(safe_filename)[0] + ".md"
             markdown_bytes = report_result.raw_markdown.encode('utf-8')
@@ -163,5 +163,3 @@ async def download_report_as_pdf(report_id: str):
 #     except Exception as e:
 #         print(f"[Route ERROR] Error en la ruta /pdf: {e}")
 #         raise HTTPException(status_code=500, detail=f"Error interno del servidor en PDF: {e}")
-
-

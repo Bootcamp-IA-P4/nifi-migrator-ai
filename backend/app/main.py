@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 try:
     print("🚀 Iniciando PRUEBA DE MEMORIA...")
 
-    # NO importamos las rutas para minimizar el consumo de RAM inicial.
     # from app.routes import analyze_routes as analyze
     # from app.routes import help_routes as help
     # from app.routes import validate_routes as validate
@@ -34,9 +33,9 @@ try:
         allow_headers=["*"],
     )
 
-    # NO incluimos los routers de la API
     # app.include_router(analyze.router, prefix="/api/v1", tags=["Analyze"])
-    # ... (el resto de routers están comentados)
+    app.include_router(audit_routes.router, prefix="/api/v1", tags=["Audit"])
+    app.include_router(chatbot.router, prefix="/api/v1", tags=["Chatbot"])
 
     print("✅ Routers NO incluidos.")
 

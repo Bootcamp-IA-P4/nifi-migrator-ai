@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FileText, AlertTriangle, CheckCircle, Database } from "lucide-react";
+import { FileText, CheckCircle, Database } from "lucide-react";
 import MermaidChart from "./MermaidChart";
 import { sanitizeMermaid } from "../utils/MermaidSanitizer";
 
@@ -117,7 +117,7 @@ const ReportView = ({ report }) => {
             {t("uploadPage.sectionTitle")} — Puntos Críticos
           </h3>
           <div className="pl-2">
-            {renderList(puntosCriticos, AlertTriangle, "text-red-500")}
+            {renderList(puntosCriticos, "text-red-500")}
           </div>
         </section>
       )}

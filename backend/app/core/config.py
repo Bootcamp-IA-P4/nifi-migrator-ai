@@ -28,7 +28,7 @@ class Settings:
     
     # --- OTRAS CONFIGURACIONES ---
     # Dataset para validación del auditor
-    DATASET_PATH: str = os.getenv("DATASET_PATH", "data/migration_plan.csv")
+    DATASET_PATH: str = os.getenv("DATASET_PATH", "backend/data/migration_plan.csv")
     # Origins para CORS
     ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",")
     REPORTS_DIR: str = "data/reports"

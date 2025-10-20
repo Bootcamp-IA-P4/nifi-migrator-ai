@@ -2,7 +2,7 @@ import sys
 import traceback
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import storage_routes, audit_routes, chatbot_routes
+from app.routes import storage_routes, chatbot_routes
 from app.core.config import settings
 
 try:
@@ -30,7 +30,7 @@ try:
     # app.include_router(help_routes.router, prefix="/api/v1", tags=["Help"])
     # app.include_router(validate_routes.router, prefix="/api/v1", tags=["Validate"])
     app.include_router(storage_routes.router, prefix="/api/v1", tags=["Storage"])
-    app.include_router(audit_routes.router, prefix="/api/v1", tags=["Audit"])
+    # app.include_router(audit_routes.router, prefix="/api/v1", tags=["Audit"])
     app.include_router(chatbot_routes.router, prefix="/api/v1", tags=["Chatbot"])
 
     print("✅ Todos los routers han sido incluidos.")

@@ -65,9 +65,9 @@ def list_bucket_files(bucket: str = settings.SUPABASE_BUCKET1):
 # esta función nos sirve para obtener el contenido de un informe
 def get_report_content_by_id(report_id: str, bucket: str = settings.SUPABASE_BUCKET_REPORTS) -> str | None:
     try:
-        file_path = f"{report_id}.md"
-        print(f"[Supabase] Attempting to download '{file_path}' from bucket '{bucket}'...")
-        response = supabase.storage.from_(bucket).download(file_path)
+        # report_id should already be the correct filename (e.g., "Flujo_basico.md")
+        print(f"[Supabase] Attempting to download '{report_id}' from bucket '{bucket}'...")
+        response = supabase.storage.from_(bucket).download(report_id)
         return response.decode('utf-8')
     except Exception as e:
         print(f"Error downloading report '{report_id}' from bucket '{bucket}': {e}")

@@ -11,6 +11,7 @@ uvicorn
 python-dotenv
 langchain
 langchain-groq
+langchain_litellm
 
 # Para desarrollo
 

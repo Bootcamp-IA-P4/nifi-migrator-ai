@@ -11,9 +11,18 @@ class StructuredReport(BaseModel):
     analisis_componentes: List[ComponentReport]
     puntos_criticos: List[str]
     recomendaciones: List[str]
+    validacion: Optional[Dict[str, Any]] = None
 
 class Report(BaseModel):
     structured: Optional[Dict[str, Any]] = None
-    raw_markdown: Optional[str] = None # chicos añado este para que reciba el informe completo
+    raw_markdown: Optional[str] = None 
     error: Optional[str] = None
+    report_filename: Optional[str] = None
 
+# modelos para el chatbot:
+
+class ChatQuery(BaseModel):
+    question: str
+
+class ChatResponse(BaseModel):
+    answer: str

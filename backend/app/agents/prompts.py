@@ -1,4 +1,5 @@
 from textwrap import dedent
+from .nifi_mapper_schema import CLEAN_MAPPING_TASK_DESCRIPTION # Importar la descripción limpia
 
 # In all prompts, we use English for the LLM's instructions and Spanish for the desired output format,
 # as this generally yields better and more structured results with current models.
@@ -104,50 +105,92 @@ ANALYSIS_TASK_EXPECTED_OUTPUT = dedent("""
 
 # --- Mapping Task Prompts ---
 
-MAPPING_TASK_DESCRIPTION = dedent("""
-    You are a NiFi migration expert specializing in the transition from NiFi 1.x to 2.x.
-    Using the detailed component analysis from the previous step, your task is to create a property-level migration plan for each component.
-
-    **Mapping Requirements:**
-
-    For each Processor and Controller Service provided, you must:
-    1.  **Confirm 2.x Equivalence:** Identify the correct equivalent component type in NiFi 2.x. Note if it's a direct match, a rename (e.g., GetHTTP -> InvokeHTTP), or requires a new pattern.
-    2.  **Create a Property Migration Table:** For each component, generate a table that maps every single property from the 1.x version to its 2.x counterpart.
-        - If a property is identical, state that.
-        - If a property has been renamed, specify the new name.
-        - If a property is deprecated, mark it as "Obsoleto" and explain the new approach.
-        - If a value needs to be changed or reviewed, provide a clear "Nota de Migración".
-
-    Your analysis must be precise and actionable for a developer.
-""")
+MAPPING_TASK_DESCRIPTION = CLEAN_MAPPING_TASK_DESCRIPTION # Usar la descripción limpia
 
 MAPPING_TASK_EXPECTED_OUTPUT = dedent("""
-    A detailed technical mapping report in Markdown, written in **Spanish**.
+```json
+{
+    "analisis_componentes": [
+        {
+            "nifi1_name": "DBCPConnectionPool",
+            "nifi1_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "nifi2_equivalent_type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+            "status": "DIRECT_MAPPING"
+        },
+        {
+            "nifi1_name": "InvokeHTTP",
+            "nifi1_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "nifi2_equivalent_type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "status": "COMPATIBLE"
+        }
+    ],
+    "puntos_criticos": [
+        "El procesador 'PutFile' requiere verificación manual de la ruta de directorio."
+    ]
+}
+```
+""")
+# Tareas para probar el agente conversor:
+CONVERSION_TASK_DESCRIPTION = dedent("""
+    As a NiFi Flow Conversion Engineer, your task is to use the component inventory (from the Analyzer) and the detailed migration plan (from the Mapper) to construct the new NiFi 2.x flow.
 
-    For each component from the context, generate a section with the following structure:
+    Your final output MUST be a single, clean Mermaid code block (`graph TD`) representing the migrated NiFi 2.x flow.
 
-    ## Plan de Migración para: [Nombre del Componente]
-    - **Componente en NiFi 1.x:** `[Tipo en 1.x]`
-    - **Equivalente en NiFi 2.x:** `[Tipo en 2.x]`
-    - **Estrategia General:** [Breve descripción: "Recrear y mapear propiedades", "Reemplazo directo", etc.]
+    **Instructions:**
+    1.  **Review the Migration Plan:** Carefully examine the mapping for each component provided in the context.
+    2.  **Construct the Diagram Nodes:** For each component, create a node in the Mermaid diagram.
+        - Use the **new NiFi 2.x equivalent name** for the component.
+        - If a component was renamed, reflect that (e.g., `A[Original Name] --> A_2[New Name]`).
+        - If a component is replaced by a new pattern, represent the new components.
+    3.  **Reconstruct Connections:** Analyze the original flow's structure to maintain the correct connections (`-->`) between the new components.
+    4.  **Handle Deprecations:** If a component is marked as obsolete, ensure it's either removed from the flow or replaced by its suggested alternative, as per the migration plan.
 
-    ### Mapeo de Propiedades
-    | Propiedad en 1.x | Valor en 1.x | Propiedad en 2.x | Valor/Acción en 2.x | Notas de Migración |
-    |------------------|--------------|------------------|---------------------|--------------------|
-    | `property_name`  | `value`      | `new_prop_name`  | `new_value`         | [Nota si es necesaria, e.g., "Revisar formato de URL"] |
-    | `another_prop`   | `old_value`  | `another_prop`   | `old_value`         | Mapeo Directo      |
-    | `deprecated_prop`| `some_value` | `(Obsoleto)`     | `(N/A)`             | Esta propiedad ha sido eliminada. La funcionalidad ahora se gestiona a través de X. |
-    ...
+    You must deliver ONLY the Mermaid code block for the NiFi 2.x flow. Do not add any extra explanations or text outside of the code block.
 """)
 
+CONVERSION_TASK_EXPECTED_OUTPUT = dedent("""
+    A single Markdown code block containing the Mermaid `graph TD` definition for the **NiFi 2.x flow**.
 
+    Example:
+    ```mermaid
+    graph TD
+        A_2[NiFi 2.x Component A (Converted)] --> B_2(NiFi 2.x Component B)
+        B_2 --> C_2{NiFi 2.x Decision}
+        C_2 -->|Yes| D_2[NiFi 2.x Component D]
+        C_2 -->|No| F_2[New 2.x Processor for Deprecated Functionality]
+    ```
+""")
 # --- Reporting Task Prompts ---
 
+REPORTER_AGENT_ROLE = "Senior Technical Writer for Migration Reports"
+REPORTER_AGENT_GOAL = dedent("""
+    Generate a comprehensive and easy-to-read migration report in Markdown format, based on the technical analysis from the migration specialist.
+""")
+REPORTER_AGENT_BACKSTORY = dedent("""
+    You are a technical writer who specializes in creating clear documentation for complex engineering projects.
+    Your skill is to take dense technical information and present it in a structured and understandable way for the developers who will execute the migration.
+""")
+CONVERTER_AGENT_ROLE = "NiFi Flow Conversion Engineer"
+CONVERTER_AGENT_GOAL = dedent("""
+    Take a detailed migration plan and the original component list to generate a visual representation of the new NiFi 2.x flow.
+    Your output must be a functional Mermaid diagram (`graph TD`) that accurately reflects the converted components, their new names, and their connections.
+""")
+CONVERTER_AGENT_BACKSTORY = dedent("""
+    You are a meticulous software engineer who translates architectural plans into concrete implementations.
+    You specialize in data flow visualization and understand how to represent complex component interactions using code.
+    You don't just copy; you interpret the migration plan to build the new structure.
+""")
 REPORTING_TASK_DESCRIPTION = dedent("""
-    You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize the detailed component analysis and the property-level migration mapping into a single, comprehensive, and professional migration report.
+    You are a Senior Technical Writer and NiFi Solutions Architect. Your task is to synthesize all the provided information—the original component analysis, the property-level migration plan, and the final converted NiFi 2.x Mermaid diagram—into a single, comprehensive, and professional migration report.
     The report must be clear, well-structured, and provide actionable insights for a technical audience.
 
-    Additionally, you MUST generate a Mermaid diagram (using `graph TD` for a top-down flow) that visually represents the migration process. This diagram should illustrate the key steps and components involved in migrating the NiFi flow from 1.x to 2.x, based on the analysis and mapping provided. The Mermaid code should be included in a separate block at the end of the report, as specified in the expected output format.
+    You MUST generate a Mermaid diagram for the **Original NiFi 1.x Flow** based on the initial analysis.
+
+    Both Mermaid code blocks should be included in separate, clearly labeled sections at the end of the report, as specified in the expected output format. Ensure the diagrams are concise but informative, focusing on the migration's impact.
+
+    The context for this task includes:
+    - **Component Analysis (Markdown):** {nifi_1x_component_analysis}
+    - **Mapped Components (JSON):** {mapped_components_json}
 """)
 
 REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
@@ -160,19 +203,27 @@ REPORTING_TASK_EXPECTED_OUTPUT = dedent("""
     A summary list of the processors and controller services found in the NiFi 1.x template.
 
     ## Plan de Migración Detallado
-    This is the core of the report. Integrate the property-by-property mapping tables for each component, as generated in the previous step. Ensure it is well-formatted and easy to read.
-
+    This is the core of the report. For each component, integrate the property-by-property mapping as a **structured Markdown list** (never tables).  
+    Mandatory format:
+    - componente_nifi_1: <nombre en 1.x>
+      equivalente_nifi_2: <nombre en 2.x>
+      notas: <texto breve con estrategia de migración>
+                                        
     ## Puntos Críticos y Advertencias
     A bulleted list highlighting the most significant risks and challenges identified during the mapping. This should be specific, e.g., "El procesador `XYZ` es obsoleto y requiere una reimplementación manual", "La propiedad `dbcp-password` debe ser configurada de forma segura en el nuevo entorno".
 
     ## Recomendaciones y Próximos Pasos
     A clear, actionable list of next steps for the migration team, such as "1. Crear un nuevo `DBCPConnectionPool` en el entorno de NiFi 2.x...", "2. Validar las nuevas rutas de los ficheros en el procesador `PutFile`...".
 
-    ## Diagrama de Flujo (Mermaid)
+    ## Diagrama de Flujo NiFi 1.x (Mermaid)
     ```mermaid
     graph TD
-        A[NiFi 1.x Flow] --> B{Analyze}
-        B --> C{Map to 2.x}
-        C --> D[NiFi 2.x Flow]
+        A[NiFi 1.x Component A] --> B(NiFi 1.x Component B)
+        B --> C{NiFi 1.x Decision}
+        C -->|Yes| D[NiFi 1.x Component D]
+        C -->|No| E[NiFi 1.x Component E]
     ```
+
+    ## Diagrama de Flujo NiFi 2.x (Mermaid)
+    [Aquí debes insertar el bloque de código Mermaid para el flujo NiFi 2.x que recibiste en el contexto de la tarea anterior]
 """)

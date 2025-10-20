@@ -1,7 +1,19 @@
 import sys
 import traceback
+import os
 
 try:
+    print("Iniciando el proceso de arranque de la aplicación...")
+
+    config_file_path = os.getenv("DATASET_PATH", "data/migration_plan.csv")
+    print(f"Verificando la existencia del archivo de datos en: {config_file_path}")
+    if not os.path.exists(config_file_path):
+        print(f"‼️ ADVERTENCIA: El archivo de datos '{config_file_path}' no se encontró.")
+    else:
+        print("✅ Archivo de datos encontrado.")
+
+
+    print("Realizando importaciones de FastAPI y módulos de la aplicación...")
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from app.routes import analyze_routes as analyze

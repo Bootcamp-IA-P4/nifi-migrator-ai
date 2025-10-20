@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_URL = 'https://nifi-migrator-ai-backend.onrender.com';
+const API_URL = 'https://nifi-migrator-ai-backend.onrender.com/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,

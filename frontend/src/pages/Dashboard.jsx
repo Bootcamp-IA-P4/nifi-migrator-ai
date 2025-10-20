@@ -161,7 +161,6 @@ const Dashboard = () => {
           </div>
         ) : error ? (
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-300 px-6 py-4 rounded-lg flex items-center gap-4">
-            <AlertTriangle className="w-6 h-6" />
             <div>
               <h3 className="font-bold">Error</h3>
               <p>{error}</p>
